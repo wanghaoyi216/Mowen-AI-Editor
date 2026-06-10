@@ -2,7 +2,7 @@ import React from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { ProjectProvider } from "./context/ProjectContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import { CommandCenter } from "./components/CommandCenter";
 import LoginPage from "./pages/LoginPage";
 import "./styles.css";
@@ -75,15 +75,10 @@ function RequireAuth({ children }: { children: React.ReactElement }) {
 }
 
 function AppRoutes() {
-  const { theme } = useTheme();
+  // v3 修复：--theme-bg-image 已在 :root 由 ThemeContext 写入，
+  // 无需再在 .cc-ink-bg 容器上 inline 设置。
   return (
-    <div
-      className="cc-ink-bg"
-      style={{
-        // v2 升级：把当前主题的背景图注入为 CSS 变量（与 .cc-ink-bg 的 background-image 配合）
-        ["--theme-bg-image" as never]: `url("${theme.imageUrl}") center center / cover no-repeat`,
-      }}
-    >
+    <div className="cc-ink-bg">
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route

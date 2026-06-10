@@ -1,0 +1,42 @@
+# Theme 04 — Moonlit Bamboo (月白)
+*Monochrome black-ink + silver-white bamboo grove under a full moon. The most literary / minimalist of the four.*
+
+## Concept
+Pure black-ink shuimo with cool moonlit silver-white undertones. Tall straight bamboo stalks dominate the left, a pale silver moon glows in the upper-right, calligraphic leaves painted with confident strokes, a single stone lantern in the middle distance. The most contemplative theme — ideal for serious writers who want zero distraction and a meditative late-night writing atmosphere.
+
+## Color Palette
+| Role | Hex | Note |
+|---|---|---|
+| Primary | #1A1A1A | Ink black — bamboo stalks, calligraphy |
+| Secondary | #3C3C46 | Cool charcoal — shadows, distant stalks |
+| Accent | #C8D0DC | Silver moonbeam — moon halo, lantern light |
+| Highlight | #F5F5F0 | Moon white — moon disk, paper base |
+| Paper | #EFEDE5 | Warm rice paper — slight warm bias in negative space |
+| Cool touch | #7A8AA0 | Cool moonlit blue — leaf highlights |
+
+## 1. Login Page Prompt
+```
+A wide traditional Chinese ink-wash painting (shuimo guohua) in a monochrome black-ink and silver-white palette with cool moonlit blue undertones. Composition: a cluster of tall straight bamboo stalks rendered in varying shades of black ink dominates the LEFT THIRD of the canvas, rising from the bottom to the top of the frame. A full pale silver moon glows softly in the upper-right corner with a faint silver halo and gentle rays. Delicate bamboo leaves are painted with confident calligraphic brush strokes, several of them drifting down through the air. A misty white ground in the foreground suggests a winding stone path through the bamboo grove. A single small traditional Chinese stone lantern sits in the middle distance near the path, casting a faint warm glow. Subtle silver moonbeams highlight the edges of the bamboo leaves on the right-facing side. The CENTER and RIGHT HALF of the canvas are deliberately kept as soft white negative space to host a login form and brand title overlay. Xuan paper texture with subtle horizontal fibers, no text, no UI, no watermark, no signature, no logo. Contemplative, poetic, minimalist, ultra detailed, 8K, panoramic 16:9 composition, cool moonlit night lighting, quiet serene atmosphere.
+```
+- Recommended image_size: landscape_16_9 (1920x1080)
+- The moon in the upper-right is the natural anchor for the brand title; place the login card center-right.
+
+## 2. Main Page (Dashboard) Prompt
+```
+A wide, low-contrast traditional Chinese ink-wash painting (shuimo guohua) designed as a soft desktop dashboard background, in monochrome black-ink and silver-white with cool moonlit blue undertones. Composition: faint vertical bamboo stalks in soft gray ink fading into white mist on the left and far right edges, a few scattered bamboo leaves drifting in the air, a barely visible pale silver moon glow in the upper-right corner, subtle horizontal mist bands across the middle, very subtle warm rice-paper horizontal fiber texture as the base layer. The whole image must be desaturated and very low contrast so dashboard widgets, sidebar, and text remain clearly readable on top. No sharp focal point, no text, no UI, no watermark, no signature, no logo. Contemplative, atmospheric, ultra detailed, 8K, panoramic 16:9 composition, cool soft moonlit lighting, generous empty space in the center.
+```
+- Recommended image_size: landscape_16_9 (1920x1080)
+- For dark mode, this theme works as-is. For light mode, overlay rgba(245,245,240,0.55) over the image.
+
+## Implementation Tips
+- This is the only theme that works equally well in light mode and dark mode — in dark mode, just invert the overlay to rgba(26,26,26,0.55).
+- A single accent color works best: choose either the cool silver #C8D0DC or a single warm lantern glow #E8B36A for the primary CTA — never both.
+- The Chinese name 月白 (yuebai) literally means "moon white" — a classical color term for a faint cool blue-white. Append 月白, 墨竹, 留白, 水墨 for stronger cultural anchoring if the model supports it.
+
+## Quick Reference: All Four Themes
+| # | Name | Mood | Best for |
+|---|---|---|---|
+| 01 | Lavender Whisper (紫韵) | Dreamy / romantic | Default — matches your existing 墨问 aesthetic |
+| 02 | Cyan & Jade (青绿) | Scholarly / literary | Calm museum-like writing environment |
+| 03 | Vermilion Maple (丹枫) | Warm / melancholic | Romance, period drama, late-night writing |
+| 04 | Moonlit Bamboo (月白) | Contemplative / minimalist | Serious writers, dark mode, zero distraction |

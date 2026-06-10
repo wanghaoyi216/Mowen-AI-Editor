@@ -1,0 +1,34 @@
+# Theme 01 — Lavender Whisper (紫韵)
+*Poetic ink-wash inspired by your existing 墨问登录页.png & 山水水墨画.png references.*
+
+## Concept
+The signature look of the product: a dreamy lavender / wisteria monochrome shuimo (水墨) landscape. Soft translucent peaks, a pavilion perched on a rocky outcrop, cherry blossom branches in the upper corner, two swallows gliding across the mist. Heavy use of negative space so the login form and dashboard cards stay legible.
+
+## Color Palette
+| Role | Hex | Note |
+|---|---|---|
+| Primary | #A294C9 | Wisteria purple — distant mountain masses |
+| Secondary | #7C6BA8 | Iris indigo — pavilion, deeper ridge lines |
+| Accent | #D9CCE9 | Pale lavender mist — floating fog bands |
+| Highlight | #FFFFFF | Xuan paper white — main negative space |
+| Ink | #3E3267 | Dark indigo — calligraphy strokes, swallows |
+| Warm touch | #E8B4C8 | Pale pink cherry blossom tips |
+
+## 1. Login Page Prompt
+```
+A wide traditional Chinese ink-wash painting (shuimo guohua) in a soft lavender and wisteria purple monochrome palette with a hint of dark indigo. Composition: a multi-tier traditional Chinese pagoda and an open pavilion sit on a rocky outcrop on the LEFT THIRD of the canvas, with cascading cherry blossom branches and a few falling petals entering from the upper-left corner. Behind them, layered translucent mountain peaks in pale lavender watercolor washes fade into white mist, with two swallows gliding in the upper sky and a faint waterfall on the right. The RIGHT HALF and CENTER of the canvas are deliberately left as soft white xuan-paper negative space to host a login form and brand logo overlay. Xuan paper texture with subtle vertical fibers throughout, brush-stroke ink edges, no text, no UI, no watermark, no signature, no logo. Ethereal, poetic, cinematic, ultra detailed, 8K, panoramic 16:9 composition, soft diffused daylight, atmospheric perspective with depth fade.
+```
+- Recommended image_size: landscape_16_9 (1920x1080)
+- Leave right ~50% blank for the login card.
+
+## 2. Main Page (Dashboard) Prompt
+```
+A wide, low-contrast traditional Chinese ink-wash painting (shuimo guohua) designed as a soft desktop dashboard background, in a muted lavender and wisteria purple monochrome palette. Composition: a barely visible pagoda silhouette on the far left horizon, three soft horizontal mist bands drifting across the middle, scattered faint cherry blossom petals floating, translucent mountain silhouettes in the far background, and a very subtle xuan-paper vertical-fiber texture as the base layer. The whole image must be extremely desaturated and low contrast so dashboard widgets, sidebar, and text remain clearly readable on top. No sharp focal point, no text, no UI, no watermark, no signature, no logo, no birds near the center. Ethereal, atmospheric, ultra detailed, 8K, panoramic 16:9 composition, soft even diffused lighting, generous empty space in the center and right.
+```
+- Recommended image_size: landscape_16_9 (1920x1080)
+- Keep contrast <= 20% so cards/tables stay readable.
+
+## Implementation Tips
+- For the login page, place the title block at top-left and the form card centered-right, both directly over the white-paper area.
+- For the main page, set the body background to the image and layer a translucent white overlay (e.g. rgba(255,255,255,0.55)) on top to ensure text contrast.
+- If your image model is more sensitive to Chinese ink-painting terminology, append the Chinese tag 中国水墨画, 留白, 山水, 亭台 to the prompt.

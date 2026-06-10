@@ -20,9 +20,9 @@
   /* ── 基础语义色（保留作为兼容回退，组件尽量改用 --theme-*）── */
   --bg: var(--theme-bg);
   --bg-accent: var(--theme-color-4);
-  --ink: #2d1b4a;
+  --ink: var(--cc-ink-deep);
   --muted: var(--theme-primary);
-  --line: rgba(58, 38, 107, 0.12);
+  --line: var(--theme-primary-12);
   --card: rgba(255, 255, 255, 0.65);
   --card-strong: rgba(255, 255, 255, 0.85);
   --blue: var(--theme-primary);
@@ -33,7 +33,91 @@
   --cc-accent: var(--theme-primary);
   --cc-accent-2: var(--theme-secondary);
   --cc-ink-deep: #3a266b;
-  --cc-plum: #ec4899;
+  --cc-plum: var(--theme-color-2, #ec4899);
+
+  /* ════════════════════════════════════════════════════════════
+     v3 修复：补齐所有 CommandCenter.css 使用的 --cc-* 变量
+     之前这些变量只在 .command-center-v2 子作用域定义，被 .nav
+     等组件覆盖；现在统一在 :root 上定义并跟随主题切换。
+     ════════════════════════════════════════════════════════════ */
+  --cc-bg: var(--theme-bg);
+  --cc-text: var(--cc-ink-deep);
+  --cc-text-secondary: var(--theme-primary);
+  --cc-card-bg: rgba(255, 255, 255, 0.78);
+  --cc-border: var(--theme-primary-12);
+  --cc-success: #059669;
+  --cc-idle: #94a3b8;
+  --cc-link: var(--theme-primary);
+  --cc-muted-soft: var(--theme-primary-08);
+  --cc-danger-soft: rgba(220, 38, 38, 0.08);
+  --cc-danger-border: rgba(220, 38, 38, 0.2);
+  --cc-card-hover: rgba(255, 255, 255, 0.92);
+  --cc-card-active: rgba(255, 255, 255, 0.5);
+  --cc-tabbar-bg: rgba(245, 240, 255, 0.55);
+  --cc-empty-bg: rgba(255, 255, 255, 0.55);
+  --cc-viz-card: rgba(255, 255, 255, 0.55);
+  --cc-accent-08: var(--theme-primary-08);
+  --cc-accent-12: var(--theme-primary-12);
+
+  /* v3 修复：补齐 124,58,237 (#7c3aed) 主题色的更多透明度级别
+     让 AgentChat.css / CommandCenter.css 中所有 rgba(124,58,237,X)
+     都能跟随主题色切换 */
+  --theme-primary-04: rgba(124, 58, 237, 0.04);
+  --theme-primary-10: rgba(124, 58, 237, 0.10);
+  --theme-primary-15: rgba(124, 58, 237, 0.15);
+  --theme-primary-18: rgba(124, 58, 237, 0.18);
+  --theme-primary-20: rgba(124, 58, 237, 0.20);
+  --theme-primary-22: rgba(124, 58, 237, 0.22);
+  --theme-primary-25: rgba(124, 58, 237, 0.25);
+  --theme-primary-30: rgba(124, 58, 237, 0.30);
+  --theme-primary-35: rgba(124, 58, 237, 0.35);
+  --theme-primary-40: rgba(124, 58, 237, 0.40);
+  --theme-primary-50: rgba(124, 58, 237, 0.50);
+
+  /* v3 修复：139,92,246 (#8b5cf6) 系列透明色 → 跟随主题色 */
+  --theme-secondary-10: rgba(139, 92, 246, 0.10);
+  --theme-secondary-15: rgba(139, 92, 246, 0.15);
+  --theme-secondary-20: rgba(139, 92, 246, 0.20);
+  --theme-secondary-25: rgba(139, 92, 246, 0.25);
+  --theme-secondary-30: rgba(139, 92, 246, 0.30);
+  --theme-secondary-40: rgba(139, 92, 246, 0.40);
+  --theme-secondary-50: rgba(139, 92, 246, 0.50);
+
+  /* v3 修复：167,139,250 (#a78bfa) 系列透明色 → 跟随主题色 */
+  --theme-secondary-light-12: rgba(167, 139, 250, 0.12);
+  --theme-secondary-light-15: rgba(167, 139, 250, 0.15);
+  --theme-secondary-light-18: rgba(167, 139, 250, 0.18);
+  --theme-secondary-light-20: rgba(167, 139, 250, 0.20);
+  --theme-secondary-light-25: rgba(167, 139, 250, 0.25);
+  --theme-secondary-light-30: rgba(167, 139, 250, 0.30);
+
+  /* v3 修复：58,38,107 (深紫) 系列透明色 */
+  --cc-ink-deep-05: rgba(58, 38, 107, 0.05);
+  --cc-ink-deep-10: rgba(58, 38, 107, 0.10);
+  --cc-ink-deep-15: rgba(58, 38, 107, 0.15);
+  --cc-ink-deep-20: rgba(58, 38, 107, 0.20);
+  --cc-ink-deep-60: rgba(76, 29, 149, 0.6);
+  --cc-ink-deep-92: rgba(58, 38, 107, 0.92);
+
+  /* v3 修复：45,27,74 (深紫) 系列透明色 */
+  --ink-deep-strong: rgba(45, 27, 74, 0.95);
+  --ink-deep-mid: rgba(45, 27, 74, 0.6);
+
+  /* v3 修复：167,139,250 (#a78bfa) 其他透明度 */
+  --theme-secondary-light-04: rgba(167, 139, 250, 0.04);
+  --theme-secondary-light-10: rgba(167, 139, 250, 0.10);
+  --theme-secondary-light-18: rgba(167, 139, 250, 0.18);
+  --theme-secondary-light-75: rgba(167, 139, 250, 0.75);
+
+  /* v3 修复：更多 secondary 透明度 */
+  --theme-secondary-05: rgba(139, 92, 246, 0.05);
+  --theme-secondary-06: rgba(139, 92, 246, 0.06);
+  --theme-secondary-08: rgba(139, 92, 246, 0.08);
+  --theme-secondary-12: rgba(139, 92, 246, 0.12);
+  --theme-secondary-18: rgba(139, 92, 246, 0.18);
+  --theme-secondary-22: rgba(139, 92, 246, 0.22);
+  --theme-secondary-35: rgba(139, 92, 246, 0.35);
+  --theme-secondary-50: rgba(139, 92, 246, 0.50);
 
   /* ════════════════════════════════════════════════════════════════════
      水墨国风字体栈 · v2 升级
@@ -163,8 +247,8 @@ h6 { font-size: var(--fs-sm);   line-height: 1.5;             letter-spacing: 0.
 .cc-ink-bg {
   position: relative;
   min-height: 100vh;
-  /* CSS 变量回退：默认仍是山水水墨画 */
-  --bg-image-default: url('/decor/system-bg.png');
+  /* CSS 变量回退：默认仍是"墨问默认主题"图 */
+  --bg-image-default: url('/themes/theme-mowen-default.png');
   background:
     /* 半透宣纸覆盖（轻微调色 + 可读性） */
     linear-gradient(180deg, color-mix(in srgb, var(--theme-bg) 80%, transparent) 0%, color-mix(in srgb, var(--theme-bg) 88%, transparent) 50%, color-mix(in srgb, var(--theme-bg) 60%, transparent) 100%),

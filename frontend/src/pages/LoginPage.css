@@ -18,11 +18,16 @@
   padding-top: 7vh;            /* 顶部内边距，让卡片整体上移 */
   font-family: var(--font-body);
   color: var(--ink);
-  /* v2 升级：背景图改为 --theme-bg-image 驱动（与 .cc-ink-bg 共享同一张主题图） */
-  --bg-image-default: url('/decor/login-bg.png');
+  /* v3 升级：背景图强制使用"墨问登录页.png"，与主页主题解耦
+     - 之前用 var(--theme-bg-image) 让登录页跟随用户主题，但用户明确希望
+       登录页与默认主题分离：登录页用专用背景，主页用用户选择的主题背景
+     - 这里用"独立 CSS 变量 + fallback"双保险，避免 :root 上的
+       --theme-bg-image 干扰登录页 */
+  --bg-image-default: url('/themes/theme-mowen-login.png');
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--theme-primary) 25%, transparent) 0%, color-mix(in srgb, var(--theme-primary) 12%, transparent) 50%, color-mix(in srgb, var(--theme-bg) 60%, transparent) 100%),
-    var(--theme-bg-image, var(--bg-image-default)) center center / cover no-repeat;
+    /* 显式直接引用登录页图，不读 --theme-bg-image */
+    url('/themes/theme-mowen-login.png') center center / cover no-repeat;
   overflow: hidden;
 }
 

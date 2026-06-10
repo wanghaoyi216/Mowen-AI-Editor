@@ -49,12 +49,14 @@ describe('ThemeContext', () => {
     localStorage.clear();
   });
 
-  it('挂载后默认主题（墨问紫）变量被写入 :root', () => {
+  it('挂载后默认主题（墨问默认主题）变量被写入 :root', () => {
     render(wrapper({}));
     expect(getRootVar('--theme-primary')).toBe('#7c3aed');
     expect(getRootVar('--theme-secondary')).toBe('#a78bfa');
     expect(getRootVar('--theme-bg')).toBe('#f5f0ff');
     expect(getRootVar('--theme-color-0')).toBe('#7c3aed');
+    // v3 修复：--theme-bg-image 也写入 :root
+    expect(getRootVar('--theme-bg-image')).toContain('theme-mowen-default.png');
   });
 
   it('切换到秋枫霞谷，--theme-primary 变 #dc2626', () => {
@@ -93,7 +95,8 @@ describe('ThemeContext', () => {
   it('themes 列表包含 6 个预设', () => {
     const { result } = renderHook(() => useTheme(), { wrapper });
     expect(result.current.themes.filter((t) => t.mode === 'preset')).toHaveLength(6);
-    expect(result.current.theme.id).toBe('mowen-login');
+    // 默认主题改为 mowen-default
+    expect(result.current.theme.id).toBe('mowen-default');
   });
 
   it('uploadTheme：把 File 解析为 dataURL 并加入主题列表', async () => {
@@ -114,6 +117,8 @@ describe('ThemeContext', () => {
     expect(mockedExtractPalette).toHaveBeenCalled();
     // --theme-primary 应是上传后提取的真实颜色
     expect(getRootVar('--theme-primary')).toBe('#0ea5e9');
+    // v3 修复：上传图片的 dataURL 也写入 --theme-bg-image
+    expect(getRootVar('--theme-bg-image')).toContain('data:image/png;base64');
   });
 
   it('removeTheme 删除自定义主题', async () => {
@@ -130,7 +135,7 @@ describe('ThemeContext', () => {
     });
     expect(result.current.themes).toHaveLength(6);
     // 删除后回到默认
-    expect(result.current.theme.id).toBe('mowen-login');
+    expect(result.current.theme.id).toBe('mowen-default');
   });
 
   it('resetThemes 清空所有自定义主题', async () => {
@@ -145,6 +150,6 @@ describe('ThemeContext', () => {
       result.current.resetThemes();
     });
     expect(result.current.themes).toHaveLength(6);
-    expect(result.current.theme.id).toBe('mowen-login');
+    expect(result.current.theme.id).toBe('mowen-default');
   });
 });

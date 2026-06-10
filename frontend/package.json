@@ -1,0 +1,42 @@
+{
+  "name": "novel-ai-editor-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@types/d3": "^7.4.3",
+    "d3": "^7.9.0",
+    "echarts": "^5.5.1",
+    "echarts-for-react": "^3.0.2",
+    "lucide-react": "^0.469.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-markdown": "^9.0.1",
+    "react-router-dom": "^7.6.1",
+    "react-syntax-highlighter": "^16.1.1",
+    "remark-gfm": "^4.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "@vitejs/plugin-react": "^4.5.2",
+    "@vitest/coverage-v8": "^4.1.8",
+    "@vitest/ui": "^4.1.8",
+    "jsdom": "^29.1.1",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vitest": "^4.1.8"
+  }
+}

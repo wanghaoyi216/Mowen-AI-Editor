@@ -1,0 +1,34 @@
+# Theme 02 — Cyan & Jade (青绿)
+*Classic Northern-Song blue-green shan-shui (青绿山水), inspired by the A Thousand Li of Rivers and Mountains aesthetic.*
+
+## Concept
+Swap the lavender for a vivid mineral-pigment palette of jade green, malachite, and indigo with gold-ochre highlights. A more scholarly / literary (文人画) feel than the default theme — perfect for users who prefer a calm, museum-like writing environment.
+
+## Color Palette
+| Role | Hex | Note |
+|---|---|---|
+| Primary | #2E7D6B | Jade green — main mountain masses |
+| Secondary | #1B4D5A | Deep indigo — ridges, shadows, ink lines |
+| Accent | #A4D4C4 | Pale celadon — water surface, distant haze |
+| Highlight | #E6C77A | Gold ochre — sunlit ridge highlights |
+| Ink | #0E1F2A | Ink black — pine trunks, calligraphy |
+| Paper | #F4F0E4 | Warm rice paper — background base |
+
+## 1. Login Page Prompt
+```
+A wide traditional Chinese blue-green shan-shui landscape painting (qinglv shanshui) in the style of the Northern Song dynasty masterpiece "A Thousand Li of Rivers and Mountains". Composition: layered mineral-pigment mountain ranges rising in tiers from the foreground to the background, with jade-green and malachite slopes and indigo shadows. A winding river of pale celadon water flows through the foreground valley. A small elegant Chinese pavilion perches on a distant cliff in the upper-left third. Gnarled dark pine trees grow on rocky outcrops in the lower-left. Soft white mist fills the valleys between mountain ranges. Warm gold-ochre highlights kiss the sunlit faces of the central peaks. The RIGHT HALF of the canvas and the sky in the upper area are deliberately kept as warm rice-paper negative space for a login form and brand title overlay. Xuan paper texture with subtle vertical fibers, mineral-pigment color blocks with clean edges (gongbi technique), no text, no UI, no watermark, no signature, no logo. Atmospheric perspective, ethereal, masterpiece, ultra detailed, 8K, panoramic 16:9 composition, golden hour soft sunlight.
+```
+- Recommended image_size: landscape_16_9 (1920x1080)
+- Place the login card in the right ~45%.
+
+## 2. Main Page (Dashboard) Prompt
+```
+A wide, low-contrast traditional Chinese blue-green shan-shui landscape painting (qinglv shanshui) designed as a soft desktop dashboard background, in muted jade-green and indigo with a warm rice-paper base. Composition: faint translucent mountain silhouettes in soft celadon and pale indigo fading into mist on the far left, subtle gold-ochre highlights on a single distant peak, a barely visible traditional Chinese pavilion on the left horizon, soft horizontal mist bands drifting across the middle, very subtle warm rice-paper fiber texture as the base layer. The whole image must be desaturated and very low contrast so dashboard widgets, sidebar, and text remain clearly readable on top. No sharp focal point, no text, no UI, no watermark, no signature, no logo. Ethereal, atmospheric, ultra detailed, 8K, panoramic 16:9 composition, soft even diffused lighting, generous empty space in the center and right.
+```
+- Recommended image_size: landscape_16_9 (1920x1080)
+- Dashboard variant should be at most 25% saturation of the login prompt.
+
+## Implementation Tips
+- Pair this theme with a serif body font (e.g. Noto Serif SC) to amplify the scholarly feel.
+- A single gold-ochre accent button (CTA) will pop beautifully against the cool greens.
+- The original reference is 王希孟《千里江山图》 — append 王希孟 千里江山图 to the prompt if the model supports Chinese art-history tags.

@@ -1,0 +1,34 @@
+# Theme 03 — Vermilion Maple (丹枫)
+*Warm autumn shuimo — cinnabar red, burnt sienna, and pale gold. A melancholic poetic mood for late-night writing sessions.*
+
+## Concept
+An autumn ink-wash landscape in warm vermilion and burnt-sienna monochrome. Rolling hills, a curving stream of pale gold, red maple branches cascading from the upper corner, a thatched-roof cottage on a distant ridge, a few wild geese flying in V-formation. The warmest of the four themes — great for romance, period drama, or melancholic literary fiction.
+
+## Color Palette
+| Role | Hex | Note |
+|---|---|---|
+| Primary | #B23A2C | Cinnabar red — main hill masses, maple leaves |
+| Secondary | #7A2A20 | Burnt sienna — shadows, deep ridges, ink lines |
+| Accent | #E8B36A | Pale gold — stream, sunlit highlights, geese |
+| Highlight | #FFE9C2 | Warm cream — sky, paper base |
+| Ink | #2A1410 | Dark seal-brown — thatched roof, tree branches |
+| Cool touch | #3A5A78 | Faint slate-blue for distant mountains |
+
+## 1. Login Page Prompt
+```
+A wide traditional Chinese ink-wash painting (shuimo guohua) in a warm vermilion, cinnabar red, burnt sienna, and pale gold monochrome palette with faint slate-blue accents for distant mountains. Composition: rolling hills in soft vermilion watercolor washes fill the lower two-thirds of the canvas. A curving stream of pale gold cuts through the foreground from the left edge to the lower-right corner. Brilliant red maple leaves cascade from a gnarled dark branch entering from the upper-right corner, with a few leaves drifting down. A small traditional Chinese thatched-roof cottage nestles among vermilion maple trees on a distant ridge in the center-left. Five or six wild geese fly in a V-formation across the warm cream sky in the upper-left. Soft mist in the valleys with pale red tints. The UPPER-RIGHT QUARTER and CENTER of the canvas are deliberately kept as warm cream / pale gold negative space to host a login form and brand title overlay. Xuan paper texture with visible calligraphic brush strokes, no text, no UI, no watermark, no signature, no logo. Poetic, melancholic, autumnal, ultra detailed, 8K, panoramic 16:9 composition, warm autumn late-afternoon lighting, atmospheric perspective.
+```
+- Recommended image_size: landscape_16_9 (1920x1080)
+- The maple branch in the upper-right naturally frames the login card.
+
+## 2. Main Page (Dashboard) Prompt
+```
+A wide, low-contrast traditional Chinese ink-wash painting (shuimo guohua) designed as a soft desktop dashboard background, in muted vermilion, burnt sienna, and pale gold monochrome with a warm cream paper base. Composition: faint translucent rolling hills in muted vermilion watercolor washes, scattered red maple leaves drifting gently in the air across the whole canvas, a barely visible thatched-roof cottage silhouette on a distant ridge, subtle golden-ochre mist drifting horizontally, very subtle xuan-paper fiber texture as the base layer. The whole image must be desaturated and very low contrast so dashboard widgets, sidebar, and text remain clearly readable on top. No sharp focal point, no text, no UI, no watermark, no signature, no logo. Atmospheric, melancholic, ultra detailed, 8K, panoramic 16:9 composition, soft warm diffused lighting, generous empty space in the center.
+```
+- Recommended image_size: landscape_16_9 (1920x1080)
+- Keep the warmth but drop saturation to <= 25% on the dashboard variant.
+
+## Implementation Tips
+- Pair with a warm dark surface for cards (e.g. rgba(42, 20, 16, 0.85)) so the cream text glows against it.
+- Use the cinnabar red #B23A2C sparingly — reserve for the primary CTA and active sidebar item only.
+- The Chinese name 丹枫 literally means "cinnabar maple" — append 秋日山水, 丹枫, 茅庐, 飞雁 for stronger cultural anchoring if the model supports it.

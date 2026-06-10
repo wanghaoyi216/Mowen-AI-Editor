@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+node_modules/
+dist/
+coverage/
+.env
+backend/novel_ai_editor.db
+npm-debug.log*
+
+# 临时文件 / spec 草稿
+.tmp/
+.trae/
+.DS_Store

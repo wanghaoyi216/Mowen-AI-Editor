@@ -70,16 +70,27 @@ type ThemeContextValue = {
 /* ----------------- 预设主题（6 张） ----------------- */
 
 /**
- * 6 张图经图片分析后的人工推荐调色板（按"水墨意境"对应色彩氛围推测）：
- * - 墨问登录页：紫墨
- * - 宁静远景：青碧玉
- * - 山水水墨画：墨白
- * - 月林空竹：墨白 + 冷月青
- * - 梦幻山水：紫蓝
- * - 秋枫霞谷：朱砂霞
+ * 6 张水墨图经图片分析后的人工推荐调色板：
+ * - 墨问登录页  ：紫墨（适合登录页 + 默认风格的暗色变体）
+ * - 墨问默认主题：紫墨（与登录页同色系，作为主页默认背景）
+ * - 宁静远景    ：青碧玉
+ * - 月林空竹    ：冷月青
+ * - 梦幻山水    ：紫蓝
+ * - 秋枫霞谷    ：朱砂霞
  */
 const PRESET_PALETTES: Record<string, Omit<Theme, "id" | "name" | "imageUrl" | "mode" | "createdAt">> = {
   "mowen-login": {
+    palette: {
+      colors: ["#7c3aed", "#a78bfa", "#ec4899", "#4c1d95", "#ede4ff", "#f5f0ff"],
+      primary: "#7c3aed",
+      secondary: "#a78bfa",
+      background: "#f5f0ff",
+      foreground: "#ffffff",
+      primarySoft: "rgba(124, 58, 237, 0.12)",
+      shadow: "rgba(58, 38, 107, 0.18)",
+    },
+  },
+  "mowen-default": {
     palette: {
       colors: ["#7c3aed", "#a78bfa", "#ec4899", "#4c1d95", "#ede4ff", "#f5f0ff"],
       primary: "#7c3aed",
@@ -99,17 +110,6 @@ const PRESET_PALETTES: Record<string, Omit<Theme, "id" | "name" | "imageUrl" | "
       foreground: "#ffffff",
       primarySoft: "rgba(13, 148, 136, 0.12)",
       shadow: "rgba(19, 78, 74, 0.18)",
-    },
-  },
-  "shanshui": {
-    palette: {
-      colors: ["#475569", "#94a3b8", "#cbd5e1", "#1e293b", "#f1f5f9", "#f8fafc"],
-      primary: "#475569",
-      secondary: "#64748b",
-      background: "#f8fafc",
-      foreground: "#ffffff",
-      primarySoft: "rgba(71, 85, 105, 0.12)",
-      shadow: "rgba(30, 41, 59, 0.18)",
     },
   },
   "moonlit-bamboo": {
@@ -149,8 +149,15 @@ const PRESET_PALETTES: Record<string, Omit<Theme, "id" | "name" | "imageUrl" | "
 
 const PRESET_THEMES: Theme[] = [
   {
+    id: "mowen-default",
+    name: "墨问 · 默认主题",
+    imageUrl: "/themes/theme-mowen-default.png",
+    mode: "preset",
+    ...PRESET_PALETTES["mowen-default"],
+  },
+  {
     id: "mowen-login",
-    name: "墨问 · 紫韵",
+    name: "墨问 · 登录页",
     imageUrl: "/themes/theme-mowen-login.png",
     mode: "preset",
     ...PRESET_PALETTES["mowen-login"],
@@ -161,13 +168,6 @@ const PRESET_THEMES: Theme[] = [
     imageUrl: "/themes/theme-cyan-jade.png",
     mode: "preset",
     ...PRESET_PALETTES["cyan-jade"],
-  },
-  {
-    id: "shanshui",
-    name: "山水 · 水墨",
-    imageUrl: "/themes/theme-shanshui.png",
-    mode: "preset",
-    ...PRESET_PALETTES["shanshui"],
   },
   {
     id: "moonlit-bamboo",
@@ -192,7 +192,7 @@ const PRESET_THEMES: Theme[] = [
   },
 ];
 
-const DEFAULT_THEME_ID = "mowen-login";
+const DEFAULT_THEME_ID = "mowen-default";
 const STORAGE_KEY = "novel-ai.theme.v1";
 const CUSTOM_STORAGE_KEY = "novel-ai.theme.custom.v1";
 
@@ -214,7 +214,7 @@ function readFileAsDataURL(file: File): Promise<string> {
 
 /* ----------------- 把调色板写入 :root ----------------- */
 
-function applyPaletteToRoot(palette: Palette) {
+function applyPaletteToRoot(palette: Palette, imageUrl?: string) {
   const root = document.documentElement;
   root.style.setProperty("--theme-primary", palette.primary);
   root.style.setProperty("--theme-secondary", palette.secondary);
@@ -222,15 +222,26 @@ function applyPaletteToRoot(palette: Palette) {
   root.style.setProperty("--theme-fg", palette.foreground);
   root.style.setProperty("--theme-primary-soft", palette.primarySoft);
   root.style.setProperty("--theme-shadow", palette.shadow);
-  // 衍生：更深的色（按钮按下）+ 更浅的色（hover）
-  // 这里用 rgba 简化（直接复用主色 12% / 24% 透明）
-  root.style.setProperty("--theme-primary-12", hexToRgba(palette.primary, 0.12));
-  root.style.setProperty("--theme-primary-24", hexToRgba(palette.primary, 0.24));
-  root.style.setProperty("--theme-primary-08", hexToRgba(palette.primary, 0.08));
+  // 衍生：所有透明度级别（v3 修复：补齐 04/10/15/18/20/22/25/30/35/40/50）
+  // 让 .command-center-v2 / .agent-chat-root 中所有 rgba(124,58,237,X)
+  // 都能跟随主题色切换
+  const primary = palette.primary;
+  const secondary = palette.secondary;
+  const alphaLevels = [0.04, 0.05, 0.06, 0.08, 0.10, 0.12, 0.15, 0.18, 0.20, 0.22, 0.25, 0.30, 0.35, 0.40, 0.50];
+  alphaLevels.forEach((a) => {
+    root.style.setProperty(`--theme-primary-${Math.round(a * 100)}`, hexToRgba(primary, a));
+    root.style.setProperty(`--theme-secondary-${Math.round(a * 100)}`, hexToRgba(secondary, a));
+  });
   // 5 个色板（用于图表 / ECharts）
   palette.colors.forEach((c, i) => {
     root.style.setProperty(`--theme-color-${i}`, c);
   });
+  // 背景图（v3 修复：写到 :root，全局生效；不再依赖 .cc-ink-bg 容器的 inline style）
+  if (imageUrl) {
+    root.style.setProperty("--theme-bg-image", `url("${imageUrl}") center center / cover no-repeat`);
+  }
+  // 提示当前主题 id（便于 CSS 调试 / 子组件识别）
+  root.setAttribute("data-theme-id", (window as { __currentThemeId?: string }).__currentThemeId || "");
 }
 
 function clearPaletteOnRoot() {
@@ -301,7 +312,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // 切换主题时立即把调色板写入 :root
   useEffect(() => {
     if (applyingRef.current) return;
-    applyPaletteToRoot(theme.palette);
+    (window as { __currentThemeId?: string }).__currentThemeId = theme.id;
+    applyPaletteToRoot(theme.palette, theme.imageUrl);
   }, [theme]);
 
   // 持久化
@@ -358,7 +370,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         // 微任务后让出
         await Promise.resolve();
         applyingRef.current = false;
-        applyPaletteToRoot(real);
+        applyPaletteToRoot(real, dataUrl);
         return { ...tempTheme, palette: real };
       } catch (err) {
         applyingRef.current = false;

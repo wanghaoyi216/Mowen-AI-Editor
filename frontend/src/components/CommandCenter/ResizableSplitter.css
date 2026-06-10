@@ -1,0 +1,52 @@
+/* frontend/src/components/CommandCenter/ResizableSplitter.css */
+.cc-splitter {
+  flex: 0 0 6px;
+  width: 6px;
+  cursor: col-resize;
+  position: relative;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  z-index: 5;
+  transition: background 150ms ease;
+}
+
+.cc-splitter::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(148, 163, 184, 0.06);
+  transition: background 150ms ease;
+}
+
+.cc-splitter:hover::before,
+.cc-splitter-active::before {
+  background: rgba(59, 130, 246, 0.18);
+}
+
+.cc-splitter-grip {
+  position: relative;
+  z-index: 1;
+  width: 2px;
+  height: 28px;
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 1px;
+  transition: background 150ms ease, height 150ms ease;
+}
+
+.cc-splitter:hover .cc-splitter-grip,
+.cc-splitter-active .cc-splitter-grip {
+  background: rgba(59, 130, 246, 0.8);
+  height: 40px;
+}
+
+.cc-splitter-active {
+  cursor: grabbing;
+}
+
+body.dragging-cc-splitter {
+  cursor: col-resize !important;
+  user-select: none !important;
+}

@@ -1,0 +1,436 @@
+/* VisualizationTab7StoryArc.css - 故事脉络专用 D3 可视化（浅紫宣纸主题） */
+
+.viz7-root {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 12px;
+  border: 1px solid rgba(58, 38, 107, 0.12);
+  box-shadow: 0 4px 16px rgba(58, 38, 107, 0.06);
+  width: 100%;
+}
+
+.viz7-toolbar {
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(58, 38, 107, 0.12);
+  gap: 12px;
+  flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.viz7-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: #3a2667;
+}
+
+.viz7-toolbar-stats {
+  font-size: 11px;
+  color: #6b3fa0;
+}
+
+.viz7-toolbar-stats strong {
+  color: #3a2667;
+  font-weight: 600;
+}
+
+.viz7-mini-legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.viz7-mini-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #6b3fa0;
+}
+
+.viz7-mini-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.viz7-graph-area {
+  flex: 1;
+  position: relative;
+  background: rgba(255, 255, 255, 0.4);
+  overflow: hidden;
+}
+
+.viz7-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Zoom controls (浅色) */
+.viz7-zoom-controls {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(58, 38, 107, 0.18);
+  border-radius: 8px;
+  padding: 4px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(58, 38, 107, 0.1);
+}
+
+.viz7-zoom-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #3a2667;
+  font-size: 16px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  min-width: 32px;
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.viz7-zoom-btn:hover {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+.viz7-zoom-btn-reset {
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+.viz7-zoom-label {
+  font-size: 10px;
+  color: #6b3fa0;
+  text-align: center;
+  padding: 2px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tooltip (浅色) */
+.viz7-tooltip {
+  position: fixed;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(58, 38, 107, 0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #3a2667;
+  line-height: 1.6;
+  box-shadow: 0 8px 24px rgba(58, 38, 107, 0.18);
+  pointer-events: none;
+  z-index: 9999;
+  max-width: 280px;
+  backdrop-filter: blur(8px);
+}
+
+.viz7-tooltip strong {
+  color: #3a2667;
+  font-weight: 700;
+}
+
+.viz7-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.viz7-tooltip-label {
+  color: #6b3fa0;
+}
+
+/* Legend panel (浅色) */
+.viz7-legend {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(58, 38, 107, 0.18);
+  border-radius: 10px;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  transition: width 250ms ease, height 250ms ease;
+  box-shadow: 0 4px 12px rgba(58, 38, 107, 0.12);
+}
+
+.viz7-legend-toggle {
+  background: transparent;
+  border: 1px solid rgba(58, 38, 107, 0.18);
+  color: #3a2667;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 3px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.viz7-legend-toggle:hover {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+.viz7-legend-content {
+  padding: 14px;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  box-sizing: border-box;
+  color: #3a2667;
+}
+
+.viz7-legend-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #3a2667;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.viz7-legend-close {
+  background: transparent;
+  border: none;
+  color: #6b3fa0;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.viz7-legend-close:hover {
+  color: #3a2667;
+}
+
+.viz7-legend-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #6b3fa0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  margin-top: 10px;
+}
+
+.viz7-legend-section-title:first-child {
+  margin-top: 0;
+}
+
+.viz7-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-size: 11px;
+  color: #3a2667;
+}
+
+.viz7-legend-row-count {
+  margin-left: auto;
+  font-size: 10px;
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+  color: #6b3fa0;
+}
+
+.viz7-legend-shape {
+  flex-shrink: 0;
+}
+
+/* Empty state (浅色主题) */
+.viz7-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(167, 139, 250, 0.1) 50%, rgba(124, 58, 237, 0.08) 100%);
+  animation: viz7-empty-pulse 6s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+
+.viz7-empty-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.25);
+}
+
+.viz7-empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #3a2667;
+}
+
+.viz7-empty-hint {
+  font-size: 13px;
+  color: #6b3fa0;
+  max-width: 360px;
+  line-height: 1.6;
+}
+
+.viz7-loading {
+  padding: 40px;
+  text-align: center;
+  color: #6b3fa0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+@keyframes viz7-empty-pulse {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Cluster badges */
+.viz7-cluster-badge {
+  position: absolute;
+  background: rgba(124, 58, 237, 0.15);
+  border: 1px solid rgba(124, 58, 237, 0.35);
+  color: #3a2667;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Skeleton (浅色) */
+.viz7-skeleton {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  text-align: center;
+  background: radial-gradient(ellipse at center, rgba(124, 58, 237, 0.08) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(167, 139, 250, 0.08) 50%, rgba(255, 255, 255, 0.4) 100%);
+  animation: viz7-skeleton-breathe 4s ease-in-out infinite;
+}
+
+.viz7-skeleton-title {
+  font-family: "Ma Shan Zheng", "STKaiti", "KaiTi", "Kaiti SC", "STKaiti", "楷体", serif;
+  font-size: 42px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 50%, #f472b6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.15em;
+  text-shadow: 0 0 30px rgba(124, 58, 237, 0.35);
+  animation: viz7-skeleton-glow 2.4s ease-in-out infinite;
+}
+
+.viz7-skeleton-dots {
+  display: inline-flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.viz7-skeleton-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #7c3aed 0%, #4c1d95 100%);
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.7);
+  display: inline-block;
+  animation: viz7-ink-jump 1.2s ease-in-out infinite;
+}
+
+.viz7-skeleton-dot:nth-child(1) { animation-delay: 0s; }
+.viz7-skeleton-dot:nth-child(2) { animation-delay: 0.15s; }
+.viz7-skeleton-dot:nth-child(3) { animation-delay: 0.3s; }
+
+.viz7-skeleton-hint {
+  font-size: 12px;
+  color: #6b3fa0;
+  letter-spacing: 0.3em;
+  opacity: 0.8;
+}
+
+.viz7-analysis-skeleton-panel {
+  flex: 1;
+  margin: 12px;
+  border-radius: 8px;
+  background: linear-gradient(90deg,
+    rgba(99, 66, 185, 0.05) 0%,
+    rgba(124, 58, 237, 0.12) 50%,
+    rgba(99, 66, 185, 0.05) 100%);
+  background-size: 200% 100%;
+  animation: viz7-skeleton-shimmer 1.6s linear infinite;
+  border: 1px solid rgba(124, 58, 237, 0.1);
+}
+
+/* SubTask 1.6 / 1.7 — analysis panel 内的 echarts 容器 */
+.viz7-emotion-chart {
+  width: 100%;
+  height: 100px;
+  margin-top: 6px;
+}
+
+.viz7-word-chart {
+  width: 100%;
+  height: 100px;
+  margin-top: 8px;
+}
+
+/* SubTask 1.8 — 图谱统计汇总卡 */
+.viz7-summary-card {
+  border-radius: 8px;
+}
+
+@keyframes viz7-skeleton-breathe {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.08); }
+}
+
+@keyframes viz7-skeleton-glow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(124, 58, 237, 0.4)); }
+  50% { filter: drop-shadow(0 0 18px rgba(236, 72, 153, 0.55)); }
+}
+
+@keyframes viz7-ink-jump {
+  0%, 100% { opacity: 0.35; transform: translateY(0) scale(0.85); }
+  50% { opacity: 1; transform: translateY(-6px) scale(1.1); }
+}
+
+@keyframes viz7-skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
