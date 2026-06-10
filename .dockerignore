@@ -1,0 +1,7 @@
+.git
+.gitignore
+**/__pycache__
+**/*.pyc
+**/node_modules
+**/dist
+backend/novel_ai_editor.db

@@ -1,0 +1,145 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Novel AI Editor · Docker Compose 全栈编排
+#
+# 服务结构：
+#   - mysql  : 关系数据库（用户 / 项目 / 章节 / 任务 …）
+#   - neo4j  : 图数据库（角色关系 / 情节线 …）
+#   - api    : FastAPI 后端（AI 创作引擎）
+#   - web    : 前端 Vite/Nginx（水墨风 UI）
+#
+# 使用方法：
+#   docker compose up -d --build          # 第一次：构建并启动所有服务
+#   docker compose logs -f --tail=50      # 查看日志
+#   docker compose down                   # 停止并删除（保留卷 = 保留数据）
+#   docker compose down -v                # 停止并清空所有数据
+#
+# 访问地址：
+#   前端：http://localhost:8080
+#   后端 API docs：http://localhost:8080/api/v1/docs 或 http://localhost:8000/api/v1/docs
+#   Neo4j Browser：http://localhost:7474
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: novel_ai_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: novel_ai_root_password
+      MYSQL_DATABASE: novel_ai_editor
+      MYSQL_USER: novel_ai
+      MYSQL_PASSWORD: novel_ai_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --innodb-buffer-pool-size=256M
+      - --log-bin-trust-function-creators=1
+    ports:
+      - "3307:3306"   # 主机可选访问：方便本地工具连接（容器内部仍用 3306）
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "novel_ai", "-pnovel_ai_password"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  neo4j:
+    image: neo4j:5.24-community
+    container_name: novel_ai_neo4j
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: neo4j/novel_ai_password
+      NEO4J_dbms_memory_heap_initial__size: 512m
+      NEO4J_dbms_memory_heap_max__size: 1G
+      NEO4J_dbms_memory_pagecache_size: 256m
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+    volumes:
+      - neo4j_data:/data
+    ports:
+      - "7474:7474"   # Browser
+      - "7687:7687"   # Bolt driver
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:7474/"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: novel_ai_api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    environment:
+      ENV: production
+      APP_NAME: "Novel AI Editor API"
+      API_V1_PREFIX: /api/v1
+      # 数据库：compose 服务名 + 容器内端口
+      DATABASE_URL: mysql+aiomysql://novel_ai:novel_ai_password@mysql:3306/novel_ai_editor?charset=utf8mb4
+      # JWT 密钥（部署前请改强，避免泄露）
+      SECRET_KEY: CHANGE_ME_TO_A_STRONG_RANDOM_STRING_AT_LEAST_64_CHARS
+      # Neo4j 图数据库
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_DATABASE: neo4j
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: novel_ai_password
+      # 跨域白名单（逗号分隔）——允许前端域名
+      CORS_ORIGINS: http://localhost:8080,http://127.0.0.1:8080,http://localhost:3000
+      # AI 模型：所有 NVIDIA_* 字段（API_KEY、BASE_URL、PRIMARY_MODEL、FALLBACK_MODELS、
+      # ENABLE_THINKING、REASONING_BUDGET、MAX_OUTPUT_TOKENS、TOP_P、
+      # PRIMARY/FALLBACK_REQUEST_TIMEOUT_SECONDS）以及 CREATOR/CONTROLLER/EMBEDDING_MODEL
+      # 全部从 ./backend/.env 读（volumes 挂到 /app/.env）。这里不要再硬编码，
+      # 否则 Pydantic 会优先用环境变量空字符串把 .env 覆盖掉。
+      # 可选外部搜索
+      TAVILY_API_KEY: "${TAVILY_API_KEY:-}"
+      FIRECRAWL_KEY: "${FIRECRAWL_KEY:-}"
+      # 速率限制
+      RATE_LIMIT_CALLS_PER_MINUTE: 40
+    ports:
+      - "8000:8000"
+    volumes:
+      - alembic_logs:/app/logs
+      # 宿主机 .env 直接挂到容器 /app/.env，Pydantic settings 默认就找 /app/.env
+      - ./backend/.env:/app/.env:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read(); sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: novel_ai_web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      VITE_API_BASE_URL: ""   # 留空表示用同域：/api/v1（Nginx 反代到 api 服务）
+    ports:
+      - "8080:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 持久化卷：mysql、neo4j 数据跨重启保留
+# ─────────────────────────────────────────────────────────────────────────────
+volumes:
+  mysql_data:
+  neo4j_data:
+  alembic_logs:

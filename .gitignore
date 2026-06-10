@@ -1,16 +1,119 @@
+# ─────────────────────────────────────────────────────────────────
+# Novel AI Editor · .gitignore
+# ─────────────────────────────────────────────────────────────────
+
+# ===== Python 字节码 / 虚拟环境 =====
 __pycache__/
-*.pyc
-.pytest_cache/
+*.py[cod]
+*$py.class
+*.so
+.Python
 .venv/
 venv/
+env/
+ENV/
+.eggs/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+# ===== Node / 前端 =====
 node_modules/
 dist/
+build/
+.next/
+.nuxt/
+.vite/
 coverage/
-.env
-backend/novel_ai_editor.db
-npm-debug.log*
+*.tsbuildinfo
+.npm
+.yarn/
+.pnp.*
+.eslintcache
+.stylelintcache
 
-# 临时文件 / spec 草稿
+# ===== 日志 / 临时文件 =====
+*.log
+*.log.*
+*.pid
+*.seed
+*.pid.lock
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+backend_full.log
+backend_log_full.txt
+backend_test.log
+build_web*.log
+docker_build.log
+
+# ===== 临时目录 / 草稿 =====
 .tmp/
 .trae/
+.cache/
+.local/
+exports/test_*
+backend/exports/test_*
+
+# ===== 环境变量 / 密钥 / 数据库 =====
+.env
+.env.*
+!.env.example
+*.db
+*.sqlite
+*.sqlite3
+backend/novel_ai_editor.db
+mysql_data/
+neo4j_data/
+
+# ===== IDE / 编辑器 =====
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
 .DS_Store
+Thumbs.db
+*.iml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/dictionaries
+.idea/shelf
+
+# ===== 调试 / 探针脚本（临时写的，用完即删） =====
+# 任何 probe_* / debug_* / monitor_* / test_*.py 都默认忽略
+# （_test.py / test_*.py 在 tests/ 目录下的不算）
+/probe_*.py
+/debug_*.py
+/monitor_*.py
+/list_*.py
+/capture_*.py
+/capture_*.ps1
+/find_window.ps1
+/headless_capture*.ps1
+/check_*.sql
+/check_*.py
+/项目目前存在的问题.md
+/项目目前存在*.md
+/*问题*.md
+/*.tmp
+/_*.ps1
+/_*.py
+
+# ===== 系统文件 =====
+*.bak
+*.tmp
+*.orig
+*.rej
+.cache
+
+# ─────────────────────────────────────────────────────────────────
+# 注意：以下文件**必须** commit 进来（用 ! 反向规则）
+# ─────────────────────────────────────────────────────────────────
+# !.env.example
+# !.gitignore

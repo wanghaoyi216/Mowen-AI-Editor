@@ -1,0 +1,5 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+novel_ai_editor.db
