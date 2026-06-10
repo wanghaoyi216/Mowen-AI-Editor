@@ -6,7 +6,7 @@
 
 一款全链路自动化的 AI 小说创作工作台。从一个题材关键词出发，系统会按"规划 → 逐章创作 → 一致性审查"三阶段自动产出可读的长篇草稿，内置热点探索、世界观构建、角色图谱、剧情编排、章节写作、实体提取、Human-in-the-Loop 确认和导出归档完整链路。
 
-[English](#) · [快速上手](#-快速上手) · [在线演示截图](#-界面预览) · [架构设计](docs/ARCHITECTURE.md) · [贡献指南](#-贡献指南)
+[English](#) · [快速上手](#-快速上手) · [界面预览](#-界面预览) · [架构设计](docs/ARCHITECTURE.md) · [贡献指南](#-贡献指南)
 
 </div>
 
@@ -38,7 +38,7 @@
 | 🤖 **全链路 AI 编排** | 热点 → 世界观 → 角色图谱 → 剧情规划 → 章节写作 → 一致性检查 | 给一个题材 + 初始 prompt，AI 自动跑完全流程 |
 | 🛑 **Human-in-the-Loop** | 关键节点（确认点）可暂停人工审批 | 不想全自动？随时介入把控方向 |
 | 🕸️ **知识图谱** | Neo4j 存角色关系 / 实体关系 / 故事事件 | 跨章节自动保持人物关系一致性 |
-| 📊 **大屏指挥中心** | 8 阶段工作流 + 6 个可视化 Tab | 单一屏幕看清 AI 创作全过程 |
+| 📊 **大屏指挥中心** | 8 阶段工作流 + 8 个可视化 Tab | 单一屏幕看清 AI 创作全过程 |
 | 🔁 **多模型降级链** | NVIDIA NIM + 自定义 fallback 链 | 主模型挂掉自动切备，主线任务不中断 |
 | 🐳 **Docker 一键拉起** | 4 个服务（web/api/mysql/neo4j）编排 | 5 分钟从克隆到能用 |
 
@@ -46,31 +46,52 @@
 
 ## 📸 界面预览
 
-### 登录页（水墨紫主题）
+> 以下截图全部由 [scripts/capture_e2e.py](scripts/capture_e2e.py) 真实操作（注册→建项目→切主题→切 Tab）后由 Playwright + 系统 Edge headless 抓取，分辨率 1920×1080。
 
-![Login](docs/screenshots/01-login.png)
+### 1. 用户流程（真实操作截图）
 
-### 6 套内置主题
+| # | 步骤 | 截图 |
+| - | ---- | ---- |
+| 1 | 登录页（水墨紫主题） | ![Login](docs/screenshots/01-login.png) |
+| 2 | 切换到"注册" tab | ![Register Tab](docs/screenshots/02-register-tab.png) |
+| 3 | 填写注册信息 | ![Register Filled](docs/screenshots/03-register-filled.png) |
+| 4 | 注册成功，进入主系统 | ![Home](docs/screenshots/04-home-after-register.png) |
+| 5 | 新建创作项目（弹窗） | ![New Project](docs/screenshots/05-new-project-modal.png) |
+| 6 | 填写项目名称 + 主题关键词 | ![New Project Filled](docs/screenshots/06-new-project-filled.png) |
+| 7 | 项目创建完成 | ![Project Created](docs/screenshots/07-after-create-project.png) |
+| 8 | 主题切换面板（6 张主题 + 上传） | ![Theme Switcher](docs/screenshots/08-theme-switcher.png) |
+| 11 | 启动 AI 创作（多模型 + fallback 链） | ![Start Creation](docs/screenshots/11-start-creation-modal.png) |
 
-| 墨问 · 默认 | 墨问 · 登录 | 宁静远景（青碧玉） |
-| :---: | :---: | :---: |
-| ![](docs/screenshots/theme-01-mowen-default.png) | ![](docs/screenshots/theme-02-mowen-login.png) | ![](docs/screenshots/theme-03-cyan-jade.png) |
+### 2. 三套主题对比（同一界面，不同主题）
 
-| 月林空竹（冷月青） | 梦幻山水（紫蓝） | 秋枫霞谷（朱砂霞） |
-| :---: | :---: | :---: |
-| ![](docs/screenshots/theme-04-moonlit-bamboo.png) | ![](docs/screenshots/theme-05-dreamy-ink.png) | ![](docs/screenshots/theme-06-vermilion-maple.png) |
+| 主题 | 配色 | 截图 |
+| ---- | ---- | ---- |
+| 墨问·默认 | 紫罗兰（毛笔书法） | ![Default](docs/screenshots/10-theme-mowen-default.png) |
+| 宁静·远景 | 青碧玉 | ![Cyan](docs/screenshots/09-theme-cyan-jade.png) |
+| 秋枫·霞谷 | 朱砂红 | ![Vermilion](docs/screenshots/21-theme-vermilion.png) |
 
-> **主题原理**：上传任意图片后，前端 Median Cut 算法提取 5 个主色 → 注入到 `:root` 上的 CSS 变量（`--theme-primary` / `--theme-secondary` / `--theme-bg-image` 等 30+ 个变量）→ 整个应用界面立刻跟着换色。
+### 3. 大屏指挥中心 · 8 个可视化 Tab
 
-### REST API 文档（自动生成）
+| Tab | 用途 | 截图 |
+| --- | ---- | ---- |
+| **热点探索** | 联网搜索题材热点 + 趋势分析 | ![](docs/screenshots/12-tab-热点探索.png) |
+| **世界构建** | 自动生成世界观设定、势力、地理 | ![](docs/screenshots/13-tab-世界构建.png) |
+| **章节写作** | 章节状态、字数、进度一目了然 | ![](docs/screenshots/14-tab-章节写作.png) |
+| **一致性检查** | 5 维雷达图 + 角色/剧情一致性评分 | ![](docs/screenshots/15-tab-一致性检查.png) |
+| **故事图谱** | D3 力导向图，5 类节点（角色/剧情/事件/世界观/主题） | ![](docs/screenshots/16-tab-故事图谱.png) |
+| **故事脉络** | Story Arc 故事线展开 + 节点关系 | ![](docs/screenshots/17-tab-故事脉络.png) |
+| **全局统计** | 实时 KPI、字数趋势、章节完成率 | ![](docs/screenshots/18-tab-全局统计.png) |
+| **故事总览** | 仪表盘 + 创作指导建议 | ![](docs/screenshots/19-tab-故事总览.png) |
+
+### 4. 后端 API 文档
 
 ![API Docs](docs/screenshots/03-api-docs.png)
 
-### Neo4j Browser（关系图谱）
+### 5. Neo4j Browser（关系图谱）
 
 ![Neo4j](docs/screenshots/04-neo4j.png)
 
-> 登录后的"大屏指挥中心"完整截图见 [docs/screenshot-guide.md](docs/screenshot-guide.md)（需手动登录后截取）
+> 6 张内置主题的高清原图（含水墨山水、登录页专属）位于 `frontend/public/themes/`，可直接拖到浏览器看完整效果。
 
 ---
 
@@ -161,17 +182,33 @@ docker compose ps
 | <http://localhost:8000/api/v1/docs> | 后端 Swagger 文档 |
 | <http://localhost:7474> | Neo4j Browser（账号 `neo4j` / 密码见 `.env`） |
 
-### 5. 重建 / 回滚（Windows PowerShell）
+### 5. 重建 / 回滚
 
+**Windows PowerShell**：
 ```powershell
-# 改完代码后重建前端 + 后端
 powershell -ExecutionPolicy Bypass -File scripts/rebuild.ps1
-
-# 出问题想回到上一版本
 powershell -ExecutionPolicy Bypass -File scripts/rollback.ps1
 ```
 
-对应的 Linux / macOS 脚本：`scripts/rebuild.sh` / `scripts/rollback.sh`。
+**Linux / macOS**：
+```bash
+bash scripts/rebuild.sh
+bash scripts/rollback.sh
+```
+
+### 6. 重新生成 README 截图
+
+需要 Python 3.10+ 和 Playwright：
+
+```bash
+pip install playwright
+python -m playwright install chromium
+python scripts/capture_e2e.py    # 20+ 张核心流程截图
+python scripts/capture_extra.py # 主题对比 + AI 聊天补充
+```
+
+> 脚本默认调用系统 Edge（`C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`），
+> 避免下载 200MB+ 的 chromium。需要在 Linux/macOS 上跑时把 `EDGE` 常量改成自己的路径。
 
 ---
 
@@ -208,6 +245,17 @@ powershell -ExecutionPolicy Bypass -File scripts/rollback.ps1
        整个 UI 立刻换色
 ```
 
+### 6 套内置主题
+
+| 主题 | 主色 | 适用场景 |
+| ---- | ---- | -------- |
+| **墨问·默认** | 紫罗兰 #7c3aed | 通用，长篇创作 |
+| **墨问·登录页** | 紫罗兰 + 楼阁 | 登录页专属 |
+| **宁静·远景** | 青碧玉 #4f9a8c | 仙侠、修真 |
+| **月林·空竹** | 冷月青 #5a7c8a | 古风、悬疑 |
+| **梦幻·山水** | 紫蓝 #8b5cf6 | 玄幻、奇幻 |
+| **秋枫·霞谷** | 朱砂红 #c0392b | 历史、权谋、爱情 |
+
 ### 自定义上传
 
 点右上角"主题"按钮 → 点最后一张 "上传我的背景" 卡片 → 选一张图（jpg / png / webp）→ 系统会：
@@ -227,7 +275,7 @@ powershell -ExecutionPolicy Bypass -File scripts/rollback.ps1
 - 按 `饱和度 × 0.6 + 亮度适配度 × 0.4` 评分排序
 - 输出 5 个最具代表性的颜色
 
-零依赖、~150 行 TS、可在 jsdom 里跑单元测试（见 [src/contexts/__tests__/ThemeContext.test.tsx](frontend/src/contexts/__tests__/ThemeContext.test.tsx)）。
+零依赖、~150 行 TS、可在 jsdom 里跑单元测试。
 
 ---
 
@@ -304,14 +352,17 @@ novel-ai-editer/
 │   ├── OPERATIONS.md         # 运维手册
 │   ├── API_CHEATSHEET.md     # API 速查表
 │   ├── AI_PROMPTS.md         # 提示词工程笔记
-│   └── screenshots/          # README 引用截图
+│   └── screenshots/          # README 引用截图（自动生成）
 │
 ├── cache-memory/             # 项目内"开发记忆"（计划 / 风险 / 复盘 / 迭代日志）
 │
 ├── scripts/                  # 跨语言工具脚本
 │   ├── rebuild.ps1 / .sh     # 重建镜像
 │   ├── rollback.ps1 / .sh    # 回滚版本
-│   └── screenshot.ps1        # 截 README 展示图
+│   ├── screenshot.ps1        # 截 README 展示图（Edge headless）
+│   ├── capture_e2e.py        # E2E 流程截图（注册→建项目→主题→Tab）
+│   ├── capture_extra.py      # 主题对比 + 启动创作弹窗
+│   └── capture_10_20.py      # 补拍脚本
 │
 ├── docker-compose.yml        # 4 服务编排
 ├── .env.example              # 环境变量模板
@@ -367,6 +418,7 @@ cd frontend && npm test
 | [OPERATIONS.md](docs/OPERATIONS.md) | 运维 / 二次开发 | 5 分钟启动 + 15 分钟排错 |
 | [AI_PROMPTS.md](docs/AI_PROMPTS.md) | AI 工程师 | 系统提示词演进 + Few-shot 案例 |
 | [OPTIMIZATION_PROMPT.md](docs/OPTIMIZATION_PROMPT.md) | 调优者 | 性能 / 成本 / 质量调优提示词 |
+| [screenshot-guide.md](docs/screenshot-guide.md) | 维护者 | README 截图的采集方法 |
 
 ---
 
@@ -437,6 +489,7 @@ cd frontend && npm test
 - 可视化：[Apache ECharts](https://echarts.apache.org/) + [D3.js](https://d3js.org/)
 - 图谱：[Neo4j](https://neo4j.com/) Community Edition
 - 图标：[Lucide](https://lucide.dev/)
+- 字体：[Ma Shan Zheng](https://fonts.google.com/specimen/Ma+Shan+Zheng) (毛笔) + [Noto Serif SC](https://fonts.google.com/noto/specimen/Noto+Serif+SC) (思源宋体)
 
 ---
 
