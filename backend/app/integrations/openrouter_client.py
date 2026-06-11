@@ -188,10 +188,13 @@ class OpenRouterClient:
             return response.json()
 
         try:
+            # FirstByteTimeout 不重试：同模型刚 first-byte 超时，重试 N 次也是
+            # 等 N×timeout 秒。直接抛给上层 openrouter_service 切下一个 fallback。
             result = with_retries(
                 operation,
                 retries=settings.external_request_retries,
                 retry_exceptions=(httpx.TimeoutException, httpx.NetworkError),
+                no_retry_exceptions=(FirstByteTimeout,),
             )
         except OpenRouterAPIError:
             raise
@@ -429,10 +432,13 @@ class OpenRouterClient:
             }
 
         try:
+            # FirstByteTimeout 不重试：同模型刚 first-byte 超时，重试 N 次也是
+            # 等 N×timeout 秒。直接抛给上层 openrouter_service 切下一个 fallback。
             assembled = with_retries(
                 operation,
                 retries=settings.external_request_retries,
                 retry_exceptions=(httpx.TimeoutException, httpx.NetworkError),
+                no_retry_exceptions=(FirstByteTimeout,),
             )
         except OpenRouterAPIError:
             raise

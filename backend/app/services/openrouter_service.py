@@ -296,9 +296,13 @@ def generate_with_openrouter_fallback(
                     "primary" if is_primary else "fallback",
                 )
                 if stream:
-                    # 主模型流式 10s 无首字节即短路切 fallback
-                    # fallback 模型给 20s 宽容（首次冷启动可能慢一点）
-                    fb_timeout = 10.0 if is_primary else 20.0
+                    # 主模型流式无首字节即短路切 fallback。timeout 暴露到 .env，
+                    # NVIDIA 高峰期/限流时可调小（默认 10s 主、20s fallback）。
+                    fb_timeout = (
+                        float(settings.nvidia_primary_first_byte_timeout_seconds)
+                        if is_primary
+                        else float(settings.nvidia_fallback_first_byte_timeout_seconds)
+                    )
                     # 主模型是 reasoning model，thinking 阶段可能 1-5 分钟
                     # fallback 是普通模型，几十秒足够
                     req_timeout = (

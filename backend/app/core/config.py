@@ -75,6 +75,10 @@ class Settings(BaseSettings):
     # fallback 是普通模型，30-60s 足够。
     nvidia_primary_request_timeout_seconds: float = Field(default=600.0, validation_alias="NVIDIA_PRIMARY_REQUEST_TIMEOUT_SECONDS", description="主模型整体请求超时")
     nvidia_fallback_request_timeout_seconds: float = Field(default=60.0, validation_alias="NVIDIA_FALLBACK_REQUEST_TIMEOUT_SECONDS", description="fallback 模型整体请求超时")
+    # 首字节超时（秒）：建立连接后 N 秒内没收到任何 SSE 数据行 → 切下一个模型。
+    # 之前硬编码 10/20，现在暴露到 .env，方便 NVIDIA 限流时调小。
+    nvidia_primary_first_byte_timeout_seconds: float = Field(default=10.0, validation_alias="NVIDIA_PRIMARY_FIRST_BYTE_TIMEOUT_SECONDS", description="主模型首字节超时")
+    nvidia_fallback_first_byte_timeout_seconds: float = Field(default=20.0, validation_alias="NVIDIA_FALLBACK_FIRST_BYTE_TIMEOUT_SECONDS", description="fallback 模型首字节超时")
 
     model_config = SettingsConfigDict(
         env_file=".env",
