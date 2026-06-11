@@ -329,10 +329,28 @@ class OpenRouterClient:
                         if first_byte_timeout and first_byte_timeout > 0
                         else None
                     )
+                    # 绝对 deadline：流开启后总耗时不能超过 request_timeout
+                    # （httpx 的 timeout 是 per-read，遇到 keep-alive 注释行不触发，
+                    # 没有 absolute deadline 的话 LLM 那边 hang 死会让我们永远阻塞）
+                    absolute_deadline = (
+                        request_start + request_timeout
+                        if request_timeout and request_timeout > 0
+                        else None
+                    )
                     got_first_byte = False
                     saw_any_line = False
 
                     for raw_line in response.iter_lines():
+                        # 绝对 deadline 短路：每行 read 前先检查，超过强制抛超时
+                        # 这样无论服务端发什么（数据行 / keep-alive / 啥都不发）
+                        # 都能在 deadline 时退出流（切 fallback）
+                        if absolute_deadline is not None and time.monotonic() > absolute_deadline:
+                            logger.warning(
+                                "OpenRouter stream absolute deadline exceeded: model=%s, timeout=%.1fs",
+                                model,
+                                request_timeout,
+                            )
+                            raise FirstByteTimeout(model, request_timeout)
                         saw_any_line = True
                         # 首字节短路：未收到任何 data 行，且已超时
                         if not got_first_byte and first_byte_deadline is not None:

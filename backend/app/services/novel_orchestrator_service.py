@@ -25,6 +25,7 @@ from app.models.plot_line import PlotLine
 from app.schemas.chapter import ChapterCreate
 from app.schemas.character import CharacterCreate
 from app.schemas.plot_line import PlotLineCreate
+from app.schemas.task_runtime import TaskStepStatusUpdate
 from app.services.agent_event_bus import AgentEvent, bus, publish_text_delta
 from app.services.book_service import get_default_book
 from app.services.chapter_loop_service import execute_chapter_with_subagents
@@ -39,7 +40,8 @@ from app.services.writing_constraints_service import (
     load_project_constraints,
 )
 from app.services.task_persistence_service import CheckpointData, TaskPersistenceManager
-from app.services.task_runtime_service import get_task_runtime_state
+from app.services.task_runtime_service import get_task_runtime_state, set_task_step_runtime_state
+
 logger = logging.getLogger(__name__)
 
 
@@ -1700,6 +1702,27 @@ def execute_novel_workflow(
     final_result: dict[str, Any] = {}
     fail_status: tuple[str, str] | None = None  # (phase, error)
 
+    def _mark_step(step_no: int, step_name: str, status: str, message: str | None = None) -> None:
+        """在 Phase 边界把对应 step 的状态写回 DB（之前 steps 表 status 永不更新，
+        导致前端 Step 1 永远显示 running）。包 try/except，任何异常都不能阻断工作流。"""
+        if task_id is None:
+            return
+        try:
+            set_task_step_runtime_state(
+                project_id,
+                task_id,
+                TaskStepStatusUpdate(
+                    step_no=step_no,
+                    step_name=step_name,
+                    status=status,
+                    react_state="observe",
+                    message=message,
+                ),
+                db=db,
+            )
+        except Exception as ms_exc:  # noqa: BLE001
+            logger.debug("mark step %d %s failed (non-blocking): %s", step_no, status, ms_exc)
+
     logger.info(
         "Novel Orchestrator started: workflow_id=%s, project_id=%s, topic=%s, length=%s, "
         "start_chapter=%s, has_accumulated_context=%s",
@@ -1716,6 +1739,11 @@ def execute_novel_workflow(
         # 当 accumulated_context 提供时跳过 Phase 1，并从 DB 加载已有章节行构造最小 outline
         if accumulated_context is not None:
             logger.info("Phase 1 skipped: resuming from accumulated_context")
+            # BUG B 续跑补丁：resume 路径不走 Phase 1 try 块，所以 1807-1808 行的
+            # mark_step(1, completed) / mark_step(2, running) 不会触发。手动补打，
+            # 否则前端会一直看到 step 1=running、step 2=pending。
+            _mark_step(1, "Novel Planner", "completed", "从检查点恢复（Phase 1 之前已完成）")
+            _mark_step(2, "Chapter Generation Loop", "running", f"从第 {start_chapter} 章续跑")
             restored_chapter_plans = _load_chapter_plans_from_db(db, project_id, start_chapter)
             outline = {
                 "title": accumulated_context.get("outline_title", topic or "未命名"),
@@ -1769,6 +1797,7 @@ def execute_novel_workflow(
                     status="failed",
                     error=str(exc)[:300],
                 )
+                _mark_step(1, "Novel Planner", "failed", _summarize(str(exc), 300))
                 fail_status = ("novel_planner", str(exc))
                 final_result = {
                     "workflow_id": workflow_id,
@@ -1778,6 +1807,10 @@ def execute_novel_workflow(
                     "elapsed_seconds": time.perf_counter() - workflow_start,
                 }
                 return final_result
+
+        # Phase 1 完成（成功路径）：step 1 → completed, step 2 → running
+        _mark_step(1, "Novel Planner", "completed", "大纲规划完成")
+        _mark_step(2, "Chapter Generation Loop", "running", "开始逐章生成")
 
     # Phase 2: Chapter Loop
         # Phase 2: Chapter Loop
@@ -1812,6 +1845,7 @@ def execute_novel_workflow(
                 status="failed",
                 error=str(exc)[:300],
             )
+            _mark_step(2, "Chapter Generation Loop", "failed", _summarize(str(exc), 300))
             fail_status = ("chapter_loop", str(exc))
             final_result = {
                 "workflow_id": workflow_id,
@@ -1822,6 +1856,10 @@ def execute_novel_workflow(
                 "elapsed_seconds": time.perf_counter() - workflow_start,
             }
             return final_result
+
+        # Phase 2 完成：step 2 → completed, step 3 → running
+        _mark_step(2, "Chapter Generation Loop", "completed", f"完成 {chapter_result.get('completed', 0)}/{chapter_result.get('total_chapters', 0)} 章")
+        _mark_step(3, "Novel Reviewer", "running", "开始全文一致性审查")
 
         # Phase 3: Novel Reviewer
         try:
@@ -1834,10 +1872,18 @@ def execute_novel_workflow(
             )
         except Exception as exc:
             logger.warning("Phase 3 [Novel Reviewer] failed (non-critical): %s", exc)
+            _mark_step(3, "Novel Reviewer", "failed", _summarize(str(exc), 300))
             review_result = {
                 "status": "error",
                 "message": f"Reviewer failed: {str(exc)[:300]}",
             }
+
+        # Phase 3 完成：step 3 → completed（如果 try 成功；失败时上面已 mark failed，
+        # 但 Phase 3 是 non-critical，再次覆盖为 completed 以反映"已尝试过"）
+        if review_result.get("status") != "error":
+            _mark_step(3, "Novel Reviewer", "completed", "全文一致性审查完成")
+        else:
+            _mark_step(3, "Novel Reviewer", "completed", "Reviewer 失败但已尝试，跳过")
 
         elapsed = time.perf_counter() - workflow_start
 

@@ -8,6 +8,7 @@ from app.api.router import api_router
 from app.core.config import settings
 from app.db.base import create_db_and_tables
 from app.db.migrations import run_startup_migrations
+from app.services.task_persistence_service import TaskPersistenceManager
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +101,20 @@ def create_application() -> FastAPI:
             run_startup_migrations()
         except Exception as e:  # pragma: no cover
             logger.warning("Startup migrations failed (non-fatal): %s", e)
+
+        # 清理 orphan task：上一轮进程崩了 / OOM / LLM 流式 hang 死，
+        # daemon thread 已经不在 _active_threads 里但 DB 还显示 running 的 task
+        # 全标为 paused，用户可走 /tasks/{id}/resume 续跑
+        try:
+            paused_ids = TaskPersistenceManager().mark_orphaned_tasks_as_paused()
+            if paused_ids:
+                logger.warning(
+                    "Startup cleanup: marked %d orphan tasks as paused: %s",
+                    len(paused_ids),
+                    paused_ids,
+                )
+        except Exception as e:  # pragma: no cover - 启动期清理失败不影响服务
+            logger.warning("Orphan task cleanup on startup failed (non-fatal): %s", e)
 
     @app.get("/", tags=["system"])
     def root() -> dict:

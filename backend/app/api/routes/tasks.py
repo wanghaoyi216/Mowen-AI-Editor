@@ -780,3 +780,18 @@ def get_llm_stats_endpoint() -> ApiResponse:
     """获取 LLM 调用统计。"""
     from app.services.rate_limiter import rate_limiter
     return ApiResponse(message="llm call statistics", data=rate_limiter.get_stats())
+
+
+@router.post("/tasks/cleanup-orphans", response_model=ApiResponse)
+def cleanup_orphan_tasks_endpoint() -> ApiResponse:
+    """手动清理 orphan task：把 DB 里 ``status=running`` 但实际 worker 已死的
+    任务（daemon thread OOM / LLM 流式 hang 死 / 容器重启等场景）批量标为
+    ``paused``。用户拿到结果后可对单个 task 调 ``POST /tasks/{id}/resume`` 续跑。
+
+    启动时 main.py 也会自动跑一次，这里作为运维兜底接口。
+    """
+    paused_ids = TaskPersistenceManager().mark_orphaned_tasks_as_paused()
+    return ApiResponse(
+        message=f"清理完成，共将 {len(paused_ids)} 个 orphan task 标为 paused",
+        data={"paused_ids": paused_ids, "count": len(paused_ids)},
+    )
