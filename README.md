@@ -1,507 +1,386 @@
-<div align="center">
+# Mowen AI Editor · 墨文 AI 编辑器
 
-# 墨问 · Novel AI Editor
+> 一个面向长篇小说的 AI 协同创作平台，基于 LangGraph 多智能体编排 + 计划与执行（Plan-and-Execute）+ ReAct 反思循环，让作者从世界观构建、章节规划到正文写作全流程都能在 AI 辅助下完成。
 
-**让 AI 落墨成卷，为你写百万字江山**
-
-一款全链路自动化的 AI 小说创作工作台。从一个题材关键词出发，系统会按"规划 → 逐章创作 → 一致性审查"三阶段自动产出可读的长篇草稿，内置热点探索、世界观构建、角色图谱、剧情编排、章节写作、实体提取、Human-in-the-Loop 确认和导出归档完整链路。
-
-[English](#) · [快速上手](#-快速上手) · [界面预览](#-界面预览) · [架构设计](docs/ARCHITECTURE.md) · [贡献指南](#-贡献指南)
-
-</div>
-
-<div align="center">
-
-![GitHub stars](https://img.shields.io/github/stars/yourname/novel-ai-editer?style=flat-square)
-![GitHub forks](https://img.shields.io/github/forks/yourname/novel-ai-editer?style=flat-square)
-![GitHub issues](https://img.shields.io/github/issues/yourname/novel-ai-editer?style=flat-square)
-![GitHub license](https://img.shields.io/github/license/yourname/novel-ai-editer?style=flat-square)
-![Docker pulls](https://img.shields.io/docker/pulls/yourname/novel-ai-editer?style=flat-square)
-![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
-
-![Made with React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white&style=flat-square)
-![Made with FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white&style=flat-square)
-![Powered by MySQL](https://img.shields.io/badge/MySQL-8.4-4479A1?logo=mysql&logoColor=white&style=flat-square)
-![Powered by Neo4j](https://img.shields.io/badge/Neo4j-5.24-018bff?logo=neo4j&logoColor=white&style=flat-square)
-![Docker ready](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white&style=flat-square)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white&style=flat-square)
-
-</div>
+![登陆主页](resource/Screenshot/登陆主页.png)
 
 ---
 
-## ✨ 项目亮点
+## 目录
 
-| 模块 | 能力 | 一句话价值 |
-| ---- | ---- | ---------- |
-| 🎨 **水墨主题系统** | 6 张内置水墨图 + 自定义上传 + 实时主色提取 | 切一次主题，整个 UI（背景 / 按钮 / 边框 / 卡片）颜色都跟着变 |
-| 🤖 **全链路 AI 编排** | 热点 → 世界观 → 角色图谱 → 剧情规划 → 章节写作 → 一致性检查 | 给一个题材 + 初始 prompt，AI 自动跑完全流程 |
-| 🛑 **Human-in-the-Loop** | 关键节点（确认点）可暂停人工审批 | 不想全自动？随时介入把控方向 |
-| 🕸️ **知识图谱** | Neo4j 存角色关系 / 实体关系 / 故事事件 | 跨章节自动保持人物关系一致性 |
-| 📊 **大屏指挥中心** | 8 阶段工作流 + 8 个可视化 Tab | 单一屏幕看清 AI 创作全过程 |
-| 🔁 **多模型降级链** | NVIDIA NIM + 自定义 fallback 链 | 主模型挂掉自动切备，主线任务不中断 |
-| 🐳 **Docker 一键拉起** | 4 个服务（web/api/mysql/neo4j）编排 | 5 分钟从克隆到能用 |
-
----
-
-## 📸 界面预览
-
-> 以下截图全部由 [scripts/capture_admin.py](scripts/capture_admin.py) + [scripts/capture_themes_redo.py](scripts/capture_themes_redo.py) 真实操作（admin 登录 → 选项目「趁青春，奋斗去！」→ 切 8 Tab → 切 3 套主题）后由 Playwright + 系统 Edge headless 抓取，分辨率 1920×1080。
->
-> 项目「趁青春，奋斗去！」有 30 章完整草稿（合计 20.3 万字），所以下面的 8 Tab 截图都能看到真实数据，不是空状态。
-
-### 1. 大屏指挥中心 · 8 个可视化 Tab
-
-进入项目后，右侧是 8 个数据可视化 Tab，单屏看全 AI 创作全过程。
-
-| Tab | 用途 | 截图 |
-| --- | ---- | ---- |
-| **热点探索** | 联网搜索题材热点 + 趋势分析 | ![](docs/screenshots/12-tab-热点探索.png) |
-| **世界构建** | 自动生成世界观设定、势力、地理 | ![](docs/screenshots/13-tab-世界构建.png) |
-| **章节写作** | 章节状态、字数、进度一目了然 | ![](docs/screenshots/14-tab-章节写作.png) |
-| **一致性检查** | 5 维雷达图 + 角色/剧情一致性评分 | ![](docs/screenshots/15-tab-一致性检查.png) |
-| **故事图谱** | D3 力导向图，5 类节点（角色/剧情/事件/世界观/主题） | ![](docs/screenshots/16-tab-故事图谱.png) |
-| **故事脉络** | Story Arc 故事线展开 + 节点关系 | ![](docs/screenshots/17-tab-故事脉络.png) |
-| **全局统计** | 实时 KPI、字数趋势、章节完成率 | ![](docs/screenshots/18-tab-全局统计.png) |
-| **故事总览** | 仪表盘 + 创作指导建议 | ![](docs/screenshots/19-tab-故事总览.png) |
-
-> 上面 8 张截图的 Tab 顺序就是顶栏的 8 个 Tab，从左到右依次点击抓取。每个 Tab 都从数据库拉真实数据，所以你会看到 30 章、20 万字、世界素材 16 个等具体数字。
-
-### 2. 三套主题对比（同一项目 / 同一 Tab，不同主题）
-
-主题切换不只是换一张背景图 —— 整个 UI 的按钮、边框、卡片、悬浮态都会跟着主题主色重新着色（CSS 变量驱动，约 50 个变量一次性更新）。
-
-| 主题 | 配色 | 截图 |
-| ---- | ---- | ---- |
-| **墨问·默认** | 紫罗兰（毛笔书法） | ![Default](docs/screenshots/10-theme-mowen-default.png) |
-| **宁静·远景** | 青碧玉 #4f9a8c | ![Cyan](docs/screenshots/09-theme-cyan-jade.png) |
-| **秋枫·霞谷** | 朱砂红 #c0392b | ![Vermilion](docs/screenshots/21-theme-vermilion.png) |
-
-主题切换面板（6 张主题卡 + 自定义上传入口）：
-
-![Theme Switcher](docs/screenshots/08-theme-switcher.png)
-
-### 3. 项目主页（全屏 30 章运行中状态）
-
-进入「趁青春，奋斗去！」项目后的主界面：左侧项目栏 / 中间 AI 对话与操作日志 / 右侧 8 Tab 看板。
-
-![Home](docs/screenshots/04-home-project.png)
-
-> 6 张内置主题的高清原图（含水墨山水、登录页专属）位于 `frontend/public/themes/`，可直接拖到浏览器看完整效果。
+- [项目简介](#项目简介)
+- [技术栈](#技术栈)
+- [核心亮点](#核心亮点)
+- [快速开始](#快速开始)
+- [架构总览](#架构总览)
+- [工作流注册表](#工作流注册表)
+- [功能页面](#功能页面)
+- [API 速览](#api-速览)
+- [开发与排障](#开发与排障)
+- [项目结构](#项目结构)
 
 ---
 
-## 🏗️ 系统架构
+## 项目简介
+
+Mowen AI Editor 是一个 **AI 协同小说创作平台**。用户在前端新建项目、定义世界观、规划章节、生成正文，并通过 6 套水墨主题自定义界面观感；后端通过 LangGraph 编排多个 SubAgent、ReAct 反思循环、Plan-and-Execute 工作流，把任务拆给大模型逐步完成。
+
+设计目标：
+- **长上下文**：主创作模型 1M token 上下文（NVIDIA Nemotron-3-Ultra），支持 45+ 章小说的连贯性
+- **可恢复**：任务执行中的 checkpoint 持久化到 MySQL，进程崩了 / OOM / LLM 限流后可断点续跑
+- **可观察**：AgentEventBus 把 tool_call / tool_result / thinking / text_delta 实时推给前端
+- **可降级**：单模型失败按 fallback 列表自动切换，单卡 GPU 限流时仍能跑通
+
+---
+
+## 技术栈
+
+| 类别 | 选型 | 备注 |
+|---|---|---|
+| 前端 | React 19 + Vite 6 + TypeScript 5.8 | 6 套水墨主题（颜色提取 + 自定义上传） |
+| 后端 | FastAPI + SQLAlchemy 2 + Pydantic v2 | 异步 + 同步混合；daemon thread 跑长任务 |
+| 智能体编排 | LangGraph 0.4.8 | StateGraph + parallel SubAgent + ReAct loop |
+| 数据库 | MySQL 8.4 | 业务主库（项目、章节、任务、checkpoint） |
+| 图数据库 | Neo4j 5.24 | 故事图谱（角色 / 事件 / 世界观关系） |
+| 缓存 / 限流 | Redis 7 | AgentEventBus 进程内总线 + 跨容器待扩展 |
+| LLM 网关 | OpenRouter / NVIDIA integrate API | 主模型 + N 个 fallback，自动切换 |
+| 部署 | Docker Compose（4 服务：web / api / mysql / neo4j） | 一键起 |
+
+---
+
+## 核心亮点
+
+### 1. Plan-and-Execute 工作流注册表
+
+5 套注册式工作流（[workflow_registry_service.py](backend/app/services/workflow_registry_service.py)），每套都有独立的 `Plan → Execute → Store` 步骤：
+
+| Workflow ID | 名称 | 用途 |
+|---|---|---|
+| `wf-01` | Trend Hot Search | 规划搜索平台 / 关键词 / 分析维度 → 抓取热点 → 生成灵感报告 |
+| `wf-02` | World Building | 规划世界观设计方案 → 生成种族 / 地理 / 势力 |
+| `wf-03` | Chapter Planning | 决定章节总数和叙事策略 → 生成 ChapterPlan 列表 |
+| `wf-04` | Writing Strategy | 决定顺序写 / 主干先写 / 混合 → 选最佳策略 |
+| `wf-05` | Chapter Loop | Plan-and-Execute 编排：每章走 plan → draft → consistency → revise |
+
+入口：`POST /api/v1/projects/{project_id}/workflows/{workflow_id}/execute`
+
+### 2. LangGraph StateGraph + 并行 SubAgent
+
+[chapter_loop_service.py:1-13](backend/app/services/chapter_loop_service.py#L1-L13) 用 `StateGraph` 编排 **并行的 SubAgent**：
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│  ① 前端层  React 19 + Vite + TypeScript                       │
-│     ECharts / D3 / Lucide / React Context                     │
-│     水墨主题系统 · 大屏指挥中心 · 8 阶段工作流面板              │
-└──────────────────────────┬───────────────────────────────────┘
-                           │  HTTP/JSON  (Nginx 反代 /api → :8000)
-┌──────────────────────────▼───────────────────────────────────┐
-│  ② API 层  FastAPI (Python 3.12, :8000)                      │
-│     路由: projects / tasks / chapters / characters /         │
-│           graph / worldbook / trends / workflow / openrouter │
-│     → Pydantic 校验 · OpenAPI 文档 · 统一响应包装              │
-└──────────────────────────┬───────────────────────────────────┘
-                           │  内部函数调用
-┌──────────────────────────▼───────────────────────────────────┐
-│  ③ 服务层  Python asyncio                                      │
-│     novel_orchestrator_service   编排器（3 阶段调度）           │
-│     chapter_task_service         章节循环执行                  │
-│     confirmation_engine          Human-in-the-Loop            │
-│     openrouter_service           LLM 调用封装 (OpenAI 兼容)    │
-│     degradation_service          降级 / 重试 / 退避            │
-│     rate_limiter                 滑动窗口限流 (Redis)          │
-│     task_runtime_service         任务运行时状态 (Redis 缓存)   │
-│     theme_context                前端主题上下文（React 端）    │
-└────────┬───────────────┬──────────────────┬──────────────────┘
-         │               │                  │
-┌────────▼─────┐ ┌───────▼──────┐ ┌─────────▼────────┐
-│ ④-1 MySQL    │ │ ④-2 Neo4j    │ │ ④-3 LLM Gateway  │
-│  业务数据      │ │  实体关系图   │ │ NVIDIA NIM (主)   │
-│  utf8mb4      │ │  Cypher 查询 │ │ + 自定义 Fallback │
-└──────────────┘ └──────────────┘ └──────────────────┘
+                 ┌─ character_design  ─┐
+                 ├─ plot_design       ─┼─→  revise (conditional)
+                 └─ worldbook_check   ─┘            │
+                                                      ↓
+                                store_chapter  ←  ReAct loop (think → act → observe)
 ```
 
-> 📖 完整架构设计、模块依赖、数据流 → [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- **并行 SubAgent**：角色设计、剧情设计、世界观一致性 **同时跑**，最后 join
+- **ReAct 反思循环**：每章正文先生成初稿 → LLM 反思 → 改写，最多 N 轮
+- **条件分支**：一致性检查失败自动进 revise 节点；非关键失败走 fallback
+
+### 3. AgentEventBus 实时事件流
+
+[agent_event_bus.py](backend/app/services/agent_event_bus.py) 进程内总线，LLM 调用过程事件实时推给前端：
+
+- `tool_call` / `tool_result` / `tool_error`（联网搜索、知识图谱查询等）
+- `thinking`（reasoning 模型思考过程）
+- `text_delta`（流式 token）
+
+前端无需轮询即可看到 "AI 正在做 X / 完成 Y"。
+
+### 4. 任务 checkpoint + 断点续跑
+
+[backend/app/services/task_persistence_service.py](backend/app/services/task_persistence_service.py) + [backend/app/main.py on_startup](backend/app/main.py)：
+
+- 每次 LLM 调用前把进度写到 MySQL
+- 进程崩溃 / 容器重启时，on_startup 自动把 daemon thread 已死的 task 标为 `paused`
+- 运维端点 `POST /api/v1/projects/tasks/cleanup-orphans` 兜底
+- 用户可对单个 task 调 `POST /api/v1/projects/{project_id}/tasks/{task_id}/resume` 续跑
+
+### 5. 多模型自动降级
+
+[openrouter_client.py](backend/app/integrations/openrouter_client.py) + [openrouter_service.py](backend/app/services/openrouter_service.py)：
+
+- Primary 模型 + 多个 fallback，按序尝试
+- **首字节超时**（`NVIDIA_PRIMARY_FIRST_BYTE_TIMEOUT_SECONDS`）+ **整体超时**双保险
+- `FirstByteTimeout` 不重试（同类错误重试浪费时间），直接切下一个模型
+- 模型 hung 死时 **20s 内**切到下一个，不会让用户等满 5×60s
+
+### 6. 6 套水墨主题系统
+
+![主题风格选择](resource/Screenshot/主题风格选择.png)
+
+- 墨韵默认 / 青玉 / 月竹 / 梦墨 / 朱枫 / 用户自定义上传
+- 颜色自动提取作为 CSS 变量
+- 自定义上传走 base64 → IndexedDB 持久化
+
+### 7. 知识图谱（Neo4j）
+
+![故事图谱](resource/Screenshot/故事图谱.png)
+
+- 角色、事件、地点、势力的多对多关系
+- 章节生成时自动查询前文相关节点作为上下文（避免 LLM 失忆）
+- 前端用 [react-force-graph](https://github.com/vasturiano/react-force-graph) 渲染
 
 ---
 
-## 🚀 快速上手
+## 快速开始
 
-> **前置要求**：Docker 24.0+ 与 Docker Compose 2.20+。其他都不需要，连 Python 都不用装。
+### 前置依赖
 
-### 1. 克隆仓库
+- Docker Desktop（WSL2 backend）
+- NVIDIA API key（[build.nvidia.com](https://build.nvidia.com) 注册即可，免费 40 次/分钟）
+- 8GB+ 内存
+
+### 启动
 
 ```bash
-git clone https://github.com/yourname/novel-ai-editer.git
-cd novel-ai-editer
-```
+# 克隆
+git clone https://github.com/wanghaoyi216/Mowen-AI-Editor.git
+cd Mowen-AI-Editor
 
-### 2. 准备 LLM 凭证
-
-复制环境变量模板，填入你的 NVIDIA NIM 平台 token（[免费申请](https://build.nvidia.com/)）：
-
-```bash
+# 配置环境变量
 cp backend/.env.example backend/.env
-# 编辑 backend/.env，至少填这一行：
-#   NVIDIA_API_KEY=nvapi-xxxxxxxxxxxxxxxxxxxx
+# 编辑 backend/.env，填入 NVIDIA_API_KEY
+
+# 一键起 4 个服务
+docker compose up -d
 ```
 
-> 如果你想用 OpenAI / Anthropic / 其他 OpenAI 兼容端点，把 `NVIDIA_BASE_URL` 改成对应地址，并把 `NVIDIA_API_KEY` 换成对应平台的 key 即可。所有 LLM 字段都以 `NVIDIA_` 开头只是因为我们主用 NVIDIA NIM。
+服务起来后：
 
-### 3. 一键启动
+| 服务 | 地址 | 备注 |
+|---|---|---|
+| 前端 | http://localhost:5173 | 开发模式热更新；生产 build 由 `docker-compose.yml` 的 `web` 服务托管 |
+| 后端 API | http://localhost:8000 | OpenAPI 文档在 `/docs` |
+| MySQL | localhost:3306 | 用户 `novel_ai` / 库 `novel_ai_editor` |
+| Neo4j Browser | http://localhost:7474 | 用户 `neo4j` / 密码见 `.env` |
 
-```bash
-docker compose up -d --build
-```
+### 首次登录
 
-等待 1-2 分钟（首次构建需要装依赖），直到 4 个容器都 healthy：
+默认账号 `text` / 密码 `123456`（`.env` 可改），首次启动自动建表 + 写入种子数据。
 
-```bash
-docker compose ps
-# 期望看到 4 个 (healthy)：
-#   novel_ai_web    → http://localhost:8080
-#   novel_ai_api    → http://localhost:8000
-#   novel_ai_mysql  → 内网 3306 / 主机 3307
-#   novel_ai_neo4j  → http://localhost:7474
-```
+### 跑通一个完整任务
 
-### 4. 访问
+1. 登录后点 **新建项目**，填书名、简介、章节数
+2. 切到 **世界构建** 标签，触发 `wf-02`，生成世界观
+3. 切到 **章节写作**，触发 `wf-05`，从第 1 章开始生成
+4. 实时看到 AI 自动执行阶段：
 
-| 地址 | 说明 |
-| ---- | ---- |
-| <http://localhost:8080> | 前端主界面（注册 / 登录） |
-| <http://localhost:8000/api/v1/docs> | 后端 Swagger 文档 |
-| <http://localhost:7474> | Neo4j Browser（账号 `neo4j` / 密码见 `.env`） |
+![AI自动执行阶段](resource/Screenshot/AI自动执行阶段.png)
 
-### 5. 重建 / 回滚
+5. 完成后切到 **一致性检查**：
 
-**Windows PowerShell**：
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/rebuild.ps1
-powershell -ExecutionPolicy Bypass -File scripts/rollback.ps1
-```
-
-**Linux / macOS**：
-```bash
-bash scripts/rebuild.sh
-bash scripts/rollback.sh
-```
-
-### 6. 重新生成 README 截图
-
-需要 Python 3.10+ 和 Playwright：
-
-```bash
-pip install playwright
-# 默认调用系统 Edge (C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe)，
-# 避免下载 200MB+ 的 chromium；Linux/macOS 上把 capture_admin.py 里的 EDGE 常量改自己路径。
-
-# 1. admin 登录 → 选项目「趁青春，奋斗去！」→ 拍 8 Tab + 3 套主题
-python scripts/capture_admin.py
-# 2. 补拍 10 (墨问·默认) + 21 (秋枫·霞谷) 两张主题（用 JS 兜底点击）
-python scripts/capture_themes_redo.py
-```
-
-> **截图脚本工作流**：
-> 1. 登录 admin（密码 `admin123456`）→ 自动从项目下拉选 id=1
-> 2. 依次点击 8 个 Tab，每次等待 3.5s 让图表渲染完整
-> 3. 打开主题面板切 3 套主题（青/红/紫）各拍一张
-> 4. 输出到 `docs/screenshots/`，分辨率 1920×1080
->
-> 如果你想换演示项目，编辑 `capture_admin.py` 顶部的 `BASE` / `ADMIN_USER` / `ADMIN_PASS` 和脚本里的 `select_option(value="1")` 即可。
+![一致性检查](resource/Screenshot/一致性检查.png)
 
 ---
 
-## 🎨 主题系统
-
-水墨主题是本项目最具特色的功能，6 张内置主题 + 任意自定义上传。
-
-### 工作原理
+## 架构总览
 
 ```
-  用户选主题 / 上传图片
-            │
-            ▼
-  ┌─────────────────────┐
-  │ Median Cut 量化取色  │  ←  src/lib/colorExtractor.ts
-  │ 饱和度/亮度评分排序   │     零依赖，纯 Canvas
-  └──────────┬──────────┘
-             │
-             ▼  Palette { primary, secondary, primarySoft, secondaryLight, colors[5] }
-             │
-  ┌──────────▼──────────────────────────────┐
-  │ ThemeContext.applyPaletteToRoot()        │  ←  src/contexts/ThemeContext.tsx
-  │ 写入 :root 的 CSS 变量（约 50 个）         │
-  │   --theme-primary / --theme-secondary    │
-  │   --theme-primary-{04,05,06,08,10,12,    │
-  │     15,18,20,22,25,30,35,40,50}          │   15 个 alpha 级别
-  │   --theme-secondary-{05...50}            │
-  │   --theme-bg-image / --theme-bg-blur     │
-  │   --ink-deep / --ink-deep-mid / --ink-   │
-  │     deep-strong + 全部 --cc-* 兼容变量    │
-  └──────────┬──────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Frontend (React 19 + Vite 6)                 │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │
+│  │ 主题切换  │ │ 项目管理 │ │ 工作流   │ │ 章节写作  │ │ 故事图谱  │  │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘  │
+│            ▲                                                          │
+│            │ SSE / REST (AgentEventBus 推流)                          │
+└────────────┼─────────────────────────────────────────────────────────┘
              │
              ▼
-       整个 UI 立刻换色
+┌─────────────────────────────────────────────────────────────────────┐
+│                      Backend (FastAPI + LangGraph)                   │
+│                                                                       │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  │
+│  │  workflow_       │  │  novel_           │  │  chapter_loop_   │  │
+│  │  registry        │  │  orchestrator     │  │  service         │  │
+│  │  (Plan→Exec)     │  │  (3-Phase)        │  │  (SubAgent DAG)  │  │
+│  └────────┬─────────┘  └────────┬─────────┘  └────────┬─────────┘  │
+│           │                       │                       │           │
+│           └───────────────────────┴───────────────────────┘           │
+│                                   │                                    │
+│                                   ▼                                    │
+│           ┌─────────────────────────────────────────────┐             │
+│           │  OpenRouter Client (Primary + Fallback)     │             │
+│           │  · first_byte_timeout + absolute deadline   │             │
+│           │  · FirstByteTimeout → no_retry              │             │
+│           └────────────────────┬────────────────────────┘             │
+│                                │                                       │
+│  ┌─────────────────────────────┼─────────────────────────────────┐   │
+│  │  Persistence Layer         ▼                                    │   │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐            │   │
+│  │  │   MySQL     │  │    Neo4j    │  │    Redis    │            │   │
+│  │  │ 业务+checkpt│  │ 故事图谱    │  │ 限流+缓存   │            │   │
+│  │  └─────────────┘  └─────────────┘  └─────────────┘            │   │
+│  └────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-### 6 套内置主题
-
-| 主题 | 主色 | 适用场景 |
-| ---- | ---- | -------- |
-| **墨问·默认** | 紫罗兰 #7c3aed | 通用，长篇创作 |
-| **墨问·登录页** | 紫罗兰 + 楼阁 | 登录页专属 |
-| **宁静·远景** | 青碧玉 #4f9a8c | 仙侠、修真 |
-| **月林·空竹** | 冷月青 #5a7c8a | 古风、悬疑 |
-| **梦幻·山水** | 紫蓝 #8b5cf6 | 玄幻、奇幻 |
-| **秋枫·霞谷** | 朱砂红 #c0392b | 历史、权谋、爱情 |
-
-### 自定义上传
-
-点右上角"主题"按钮 → 点最后一张 "上传我的背景" 卡片 → 选一张图（jpg / png / webp）→ 系统会：
-
-1. 把图片编码成 dataURL 持久化到 localStorage（`novel-ai.theme.v1`）
-2. Canvas 提取 5 个主色（Median Cut 算法）
-3. 立刻应用到 UI
-4. 重新进入页面也会保留
-
-### 颜色提取算法
-
-`colorExtractor.ts` 实现的是**带权 Median Cut**：
-
-- 用 Canvas 读取像素，丢弃透明像素和过亮 / 过暗像素
-- 迭代地把当前最大色差桶二分（最多 7 层 → 128 个桶）
-- 合并相邻相近桶
-- 按 `饱和度 × 0.6 + 亮度适配度 × 0.4` 评分排序
-- 输出 5 个最具代表性的颜色
-
-零依赖、~150 行 TS、可在 jsdom 里跑单元测试。
+详细分层见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
 
 ---
 
-## 🛠️ 技术栈
+## 工作流注册表
 
-### 前端
+新增工作流只需要在 [workflow_registry_service.py](backend/app/services/workflow_registry_service.py) 加一项 `WORKFLOW_REGISTRY["wf-NN"] = WorkflowDefinition(...)`，无需改前端 / 路由：
 
-| 选型 | 用途 |
-| ---- | ---- |
-| **React 19** | UI 框架 |
-| **Vite 6** | 构建 / HMR |
-| **TypeScript 5.8** | 类型系统 |
-| **React Router 7** | 路由 |
-| **ECharts 5** + **D3 7** | 数据可视化（雷达图、力导向图、词云、折线图） |
-| **react-markdown** + **react-syntax-highlighter** | AI 回复的 Markdown 渲染 |
-| **lucide-react** | 图标库 |
-| **Vitest** + **Testing Library** | 单元测试（jsdom） |
+```python
+WORKFLOW_REGISTRY["wf-06"] = WorkflowDefinition(
+    workflow_id="wf-06",
+    name="Story Rewrite",
+    description="对已写章节做风格重写",
+    steps=[
+        WorkflowStepDefinition(1, "Plan",   "分析章节风格",      "风格画像",   ["llm_generate"]),
+        WorkflowStepDefinition(2, "Execute","重写章节正文",       "新章节",     ["llm_generate"]),
+        WorkflowStepDefinition(3, "Store",  "写入 ChapterVersion", "version_id", ["query_sqlite"]),
+    ],
+)
+```
 
-### 后端
-
-| 选型 | 用途 |
-| ---- | ---- |
-| **FastAPI 0.115** | Web 框架 |
-| **SQLAlchemy 2 (async)** | ORM |
-| **Pydantic v2** | 数据校验 / 配置 |
-| **Alembic** | 数据库迁移 |
-| **aiomysql** | MySQL 异步驱动 |
-| **Neo4j Python Driver** | 图数据库驱动 |
-| **Redis 5** | 缓存 + 限流 + 取消注册 |
-| **httpx** | 异步 HTTP 客户端（调 LLM / 搜索） |
-| **pytest** | 单元测试 / 集成测试 |
-
-### 基础设施
-
-| 选型 | 用途 |
-| ---- | ---- |
-| **Docker Compose** | 4 服务编排（web/api/mysql/neo4j） |
-| **Nginx** | 前端静态托管 + `/api` 反代 |
-| **GitHub Actions**（可选） | CI/CD |
+执行：`POST /api/v1/projects/{project_id}/workflows/wf-06/execute`
 
 ---
 
-## 📂 项目结构
+## 功能页面
+
+| 页面 | 截图 | 说明 |
+|---|---|---|
+| 登录 | ![登录](resource/Screenshot/登录页.png) | 邮箱 + 密码，JWT 认证 |
+| 主题选择 | ![主题](resource/Screenshot/主题风格选择.png) | 6 套水墨主题，提取主色 |
+| 故事总览 | ![总览](resource/Screenshot/故事总览.png) | 项目元信息 + 章节进度条 |
+| 新建项目 | ![新建](resource/Screenshot/新建项目表单.png) | 书名 / 简介 / 章节数 / 主题 |
+| 热点搜索 | ![热点](resource/Screenshot/热点搜索页.png) | wf-01 输入关键词跑灵感 |
+| 章节写作 | ![章节](resource/Screenshot/章节写作.png) | 实时流式 token + 改写按钮 |
+| AI 自动执行 | ![AI](resource/Screenshot/AI自动执行阶段.png) | 任务进度条 + 步骤状态 |
+| AI 规划详情 | ![规划](resource/Screenshot/AI规划详情.png) | Plan-and-Execute 步骤明细 |
+| 一致性检查 | ![一致](resource/Screenshot/一致性检查.png) | Reviewer 报告 |
+| 故事图谱 | ![图谱](resource/Screenshot/故事图谱.png) | Neo4j 力导向图 |
+| 故事脉络 | ![脉络](resource/Screenshot/故事脉络.png) | 时间线视图 |
+| 全局统计 | ![统计](resource/Screenshot/全局统计.png) | token 用量 / 章节字数 |
+
+---
+
+## API 速览
+
+| Method | Path | 用途 |
+|---|---|---|
+| `POST` | `/api/v1/auth/login` | 登录拿 JWT |
+| `POST` | `/api/v1/auth/register` | 注册 |
+| `GET`  | `/api/v1/projects` | 列项目 |
+| `POST` | `/api/v1/projects` | 新建项目 |
+| `GET`  | `/api/v1/projects/{id}/workflows` | 列出该项目可用工作流 |
+| `POST` | `/api/v1/projects/{id}/workflows/{wid}/execute` | 执行工作流 |
+| `GET`  | `/api/v1/projects/{id}/tasks` | 列任务 |
+| `GET`  | `/api/v1/projects/{id}/tasks/{tid}` | 任务详情 |
+| `GET`  | `/api/v1/projects/{id}/tasks/{tid}/steps` | 步骤状态 |
+| `GET`  | `/api/v1/projects/{id}/tasks/{tid}/logs` | 执行日志 |
+| `POST` | `/api/v1/projects/{id}/tasks/{tid}/pause` | 暂停 |
+| `POST` | `/api/v1/projects/{id}/tasks/{tid}/resume` | 续跑（断点恢复） |
+| `POST` | `/api/v1/projects/tasks/cleanup-orphans` | 运维：清理孤儿任务 |
+| `GET`  | `/api/v1/projects/{id}/llm-stats` | LLM 用量统计 |
+
+完整 OpenAPI Schema 在 `docs/openapi.json`，或部署后访问 `/docs`。
+
+更多 cheat sheet：[docs/API_CHEATSHEET.md](docs/API_CHEATSHEET.md)
+
+---
+
+## 开发与排障
+
+### 常用命令
+
+```bash
+# 查看 API 容器日志（实时）
+docker logs novel_ai_api --tail 200 -f
+
+# 进入 API 容器调试
+docker exec -it novel_ai_api bash
+
+# 重新 build API（代码改动后）
+docker compose build api && docker compose up -d api
+
+# 跑单测
+cd backend && pytest -q
+
+# 前端热更新
+cd frontend && npm run dev
+```
+
+### 排障清单
+
+| 症状 | 排查 |
+|---|---|
+| 任务卡在 `running` 不动 | 调 `POST /api/v1/projects/tasks/cleanup-orphans`（清理孤儿）→ 再调 resume |
+| AI 一直 60s 不返回 | 看 API 日志搜 `absolute deadline exceeded`，说明模型 hung，已自动切 fallback |
+| LLM 报 401/403 | 检查 `.env` 的 `NVIDIA_API_KEY` 是否过期（NVIDIA key 90 天滚动） |
+| Neo4j 连不上 | `docker logs novel_ai_neo4j` 看是否启动完成（首次启动要 30s+） |
+| 主题不切换 | 浏览器 console 看 `localStorage.getItem('theme')` 是否有值 |
+
+更详细的运维手册：[docs/OPERATIONS.md](docs/OPERATIONS.md)
+
+---
+
+## 项目结构
 
 ```
-novel-ai-editer/
-├── frontend/                 # React 19 + Vite 前端
-│   ├── src/
-│   │   ├── components/       # 业务组件（CommandCenter / ThemeSwitcher / …）
-│   │   ├── contexts/         # React Context（Theme / Auth / Project）
-│   │   ├── lib/              # 工具（colorExtractor / api / auth）
-│   │   ├── pages/            # 路由级页面
-│   │   └── styles.css        # 全局 CSS（含 :root 主题变量定义）
-│   └── public/themes/        # 6 张内置主题背景图
-│
-├── backend/                  # FastAPI 后端
+.
+├── backend/
 │   ├── app/
-│   │   ├── api/routes/       # 路由模块（projects/tasks/chapters/…）
-│   │   ├── core/             # 配置 / 安全 / 弹性（degradation）
-│   │   ├── db/               # ORM 模型 / 会话
-│   │   ├── graph/            # Neo4j 客户端
-│   │   ├── integrations/     # 外部 API 客户端（OpenAI 兼容 / Tavily / Firecrawl）
-│   │   ├── models/           # SQLAlchemy 模型
-│   │   ├── schemas/          # Pydantic 模型
-│   │   └── services/         # 业务逻辑（编排器 / 确认引擎 / 限流 / 任务运行时）
-│   ├── migrations/           # Alembic 数据库迁移
-│   ├── scripts/              # 维护脚本（seed / smoke test / 数据修复）
-│   └── tests/                # pytest 单元测试
-│
-├── docs/                     # 项目文档
-│   ├── PRD.md                # 产品需求文档
-│   ├── ARCHITECTURE.md       # 技术架构（30 分钟读懂项目）
-│   ├── DEPLOYMENT.md         # 部署指南
-│   ├── OPERATIONS.md         # 运维手册
-│   ├── API_CHEATSHEET.md     # API 速查表
-│   ├── AI_PROMPTS.md         # 提示词工程笔记
-│   └── screenshots/          # README 引用截图（自动生成）
-│
-├── cache-memory/             # 项目内"开发记忆"（计划 / 风险 / 复盘 / 迭代日志）
-│
-├── scripts/                  # 跨语言工具脚本
-│   ├── rebuild.ps1 / .sh     # 重建镜像
-│   ├── rollback.ps1 / .sh    # 回滚版本
-│   ├── screenshot.ps1        # 截 README 展示图（Edge headless）
-│   ├── capture_admin.py      # admin 登录 + 8 Tab + 主题切换截图（README 主用）
-│   ├── capture_themes_redo.py# 补拍 10/21 主题（JS 兜底点击）
-│   └── gen_admin_hash.py     # 重置 admin 密码的哈希生成器
-│
-├── docker-compose.yml        # 4 服务编排
-├── .env.example              # 环境变量模板
-└── README.md                 # 你正在读的这份
+│   │   ├── api/routes/        # FastAPI 路由
+│   │   │   ├── auth.py
+│   │   │   ├── projects.py
+│   │   │   ├── workflows.py   # 工作流执行入口
+│   │   │   ├── tasks.py       # 任务 CRUD + resume + cleanup-orphans
+│   │   │   └── chapters.py
+│   │   ├── services/
+│   │   │   ├── workflow_registry_service.py   # 5 套工作流注册
+│   │   │   ├── novel_orchestrator_service.py # 3-Phase 主编排
+│   │   │   ├── chapter_loop_service.py        # SubAgent DAG + ReAct
+│   │   │   ├── ai_workflow_graph_service.py   # Plan-and-Execute
+│   │   │   ├── task_persistence_service.py    # checkpoint / orphan
+│   │   │   ├── agent_event_bus.py             # 进程内事件流
+│   │   │   ├── openrouter_service.py          # 模型候选 + fallback
+│   │   │   └── ...
+│   │   ├── integrations/
+│   │   │   └── openrouter_client.py           # 含 absolute deadline
+│   │   ├── core/
+│   │   │   ├── config.py                      # Pydantic Settings
+│   │   │   └── resilience.py                  # with_retries + no_retry
+│   │   └── main.py                            # FastAPI app + on_startup
+│   ├── .env.example
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── components/         # 主题切换 / 项目卡片 / 工作流面板
+│   │   ├── pages/              # Login / Project / Chapter / Graph
+│   │   ├── stores/             # Zustand: theme / auth / task
+│   │   └── api/                # axios 封装 + SSE 订阅
+│   └── package.json
+├── docs/
+│   ├── ARCHITECTURE.md         # 详细架构
+│   ├── DEPLOYMENT.md           # 部署指南
+│   ├── OPERATIONS.md           # 运维手册
+│   ├── API_CHEATSHEET.md       # API cheat sheet
+│   └── openapi.json
+├── resource/
+│   └── Screenshot/             # README 用截图
+├── docker-compose.yml          # web / api / mysql / neo4j
+└── README.md                   # 你正在看这个
 ```
 
 ---
 
-## 🧪 本地开发（不用 Docker）
+## 致谢
 
-### 后端
-
-```bash
-cd backend
-python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env
-# 编辑 .env，至少填 NVIDIA_API_KEY
-uvicorn app.main:app --reload
-```
-
-### 前端
-
-```bash
-cd frontend
-npm install
-npm run dev
-# 浏览器打开 http://localhost:5173
-```
-
-> 前端 `VITE_API_BASE_URL` 默认指向 `/api/v1`（Nginx 反代），如果直接 `npm run dev` 跑，Vite 会自动 proxy 到 `http://localhost:8000`。
-
-### 测试
-
-```bash
-# 后端
-cd backend && pytest
-
-# 前端
-cd frontend && npm test
-```
+- [LangGraph](https://github.com/langchain-ai/langgraph) — 多智能体编排
+- [NVIDIA integrate API](https://build.nvidia.com) — Nemotron / Llama 系列模型
+- [react-force-graph](https://github.com/vasturiano/react-force-graph) — 故事图谱渲染
+- [Vite](https://vitejs.dev) + [React 19](https://react.dev) — 前端栈
 
 ---
 
-## 📚 进阶阅读
+## 许可证
 
-| 文档 | 适合谁 | 内容 |
-| ---- | ------ | ---- |
-| [PRD.md](docs/PRD.md) | 产品 / 项目经理 | 功能矩阵、用户画像、迭代路线 |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | 新入职工程师 | 30 分钟读懂系统分层 + 三阶段主链路 |
-| [API_CHEATSHEET.md](docs/API_CHEATSHEET.md) | 前端 / 集成方 | 所有高频 REST 端点 + curl 示例 |
-| [DEPLOYMENT.md](docs/DEPLOYMENT.md) | 运维 | 部署步骤 / 资源评估 / 域名 / TLS |
-| [OPERATIONS.md](docs/OPERATIONS.md) | 运维 / 二次开发 | 5 分钟启动 + 15 分钟排错 |
-| [AI_PROMPTS.md](docs/AI_PROMPTS.md) | AI 工程师 | 系统提示词演进 + Few-shot 案例 |
-| [OPTIMIZATION_PROMPT.md](docs/OPTIMIZATION_PROMPT.md) | 调优者 | 性能 / 成本 / 质量调优提示词 |
-| [screenshot-guide.md](docs/screenshot-guide.md) | 维护者 | README 截图的采集方法 |
-
----
-
-## 🤝 贡献指南
-
-我们非常欢迎 PR / Issue / Discussion！
-
-### 提 PR 之前
-
-1. Fork 仓库，创建特性分支：`git checkout -b feat/your-feature`
-2. 遵循现有代码风格（前端 ESLint + Prettier，后端 Black + isort）
-3. 跑测试：`cd backend && pytest` / `cd frontend && npm test`
-4. 写清晰的 commit message（推荐 [Conventional Commits](https://www.conventionalcommits.org/)）
-5. 在 PR 描述里说清楚：动机 / 实现思路 / 测试情况 / 截图（UI 类改动）
-
-### 提 Issue 时
-
-- Bug 报告：环境（OS / Docker 版本 / 浏览器）+ 复现步骤 + 期望行为 + 实际行为 + 日志
-- 功能建议：使用场景 + 为什么现有功能不够用 + 你期望的交互
-
-### 路线图（Roadmap）
-
-- [ ] 章节协作编辑（多人光标）
-- [ ] AI 自动配图（基于章节内容生成封面）
-- [ ] 移动端适配
-- [ ] i18n 完整英文版本
-- [ ] WebSocket 流式输出优化（断点续传）
-
-> 想认领任意一个？欢迎开 Issue 标注 `I want to work on this`。
-
----
-
-## 🛡️ 安全说明
-
-⚠️ **本项目默认配置包含演示用密码与密钥，部署到公网前务必修改！**
-
-### 必改项
-
-| 项 | 在哪儿 | 生成方式 |
-| -- | ------ | -------- |
-| `SECRET_KEY` | `backend/.env` | `python -c "import secrets; print(secrets.token_urlsafe(64))"` |
-| `MYSQL_PASSWORD` | `docker-compose.yml` | 强随机字符串 |
-| `NEO4J_AUTH` | `docker-compose.yml` | `neo4j/<强密码>` |
-| `NVIDIA_API_KEY` | `backend/.env` | NVIDIA 平台个人 token |
-
-### 不要把 `.env` 提交进 Git
-
-`.env` 已在 `.gitignore` 中，但请养成习惯：本地调试用 `.env`、仓库里只保留 `.env.example` 占位。
-
-### 发现安全漏洞
-
-请 **不要** 公开提 Issue，邮件联系维护者（见 [docs/OPERATIONS.md](docs/OPERATIONS.md)），我们会在 24 小时内响应。
-
----
-
-## 📜 License
-
-[MIT](LICENSE) · 你可以自由使用、修改、分发本项目（包括商业用途），但请保留版权声明。
-
-> 第三方依赖各自遵循其原始 License（详见 `package.json` / `requirements.txt` 的 `license` 字段）。
-
----
-
-## 🙏 致谢
-
-- 灵感来源：传统中式水墨画审美 + 现代 AI 工程实践
-- LLM Gateway：[NVIDIA NIM](https://build.nvidia.com/) 提供 OpenAI 兼容的免费模型层
-- 可视化：[Apache ECharts](https://echarts.apache.org/) + [D3.js](https://d3js.org/)
-- 图谱：[Neo4j](https://neo4j.com/) Community Edition
-- 图标：[Lucide](https://lucide.dev/)
-- 字体：[Ma Shan Zheng](https://fonts.google.com/specimen/Ma+Shan+Zheng) (毛笔) + [Noto Serif SC](https://fonts.google.com/noto/specimen/Noto+Serif+SC) (思源宋体)
-
----
-
-<div align="center">
-
-**如果这个项目对你有帮助，请点一个 ⭐ Star！**
-
-Made with 🖌️ & ☕ by [yourname](https://github.com/yourname)
-
-</div>
+仅供学习和研究使用。
