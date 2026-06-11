@@ -46,31 +46,13 @@
 
 ## 📸 界面预览
 
-> 以下截图全部由 [scripts/capture_e2e.py](scripts/capture_e2e.py) 真实操作（注册→建项目→切主题→切 Tab）后由 Playwright + 系统 Edge headless 抓取，分辨率 1920×1080。
+> 以下截图全部由 [scripts/capture_admin.py](scripts/capture_admin.py) + [scripts/capture_themes_redo.py](scripts/capture_themes_redo.py) 真实操作（admin 登录 → 选项目「趁青春，奋斗去！」→ 切 8 Tab → 切 3 套主题）后由 Playwright + 系统 Edge headless 抓取，分辨率 1920×1080。
+>
+> 项目「趁青春，奋斗去！」有 30 章完整草稿（合计 20.3 万字），所以下面的 8 Tab 截图都能看到真实数据，不是空状态。
 
-### 1. 用户流程（真实操作截图）
+### 1. 大屏指挥中心 · 8 个可视化 Tab
 
-| # | 步骤 | 截图 |
-| - | ---- | ---- |
-| 1 | 登录页（水墨紫主题） | ![Login](docs/screenshots/01-login.png) |
-| 2 | 切换到"注册" tab | ![Register Tab](docs/screenshots/02-register-tab.png) |
-| 3 | 填写注册信息 | ![Register Filled](docs/screenshots/03-register-filled.png) |
-| 4 | 注册成功，进入主系统 | ![Home](docs/screenshots/04-home-after-register.png) |
-| 5 | 新建创作项目（弹窗） | ![New Project](docs/screenshots/05-new-project-modal.png) |
-| 6 | 填写项目名称 + 主题关键词 | ![New Project Filled](docs/screenshots/06-new-project-filled.png) |
-| 7 | 项目创建完成 | ![Project Created](docs/screenshots/07-after-create-project.png) |
-| 8 | 主题切换面板（6 张主题 + 上传） | ![Theme Switcher](docs/screenshots/08-theme-switcher.png) |
-| 11 | 启动 AI 创作（多模型 + fallback 链） | ![Start Creation](docs/screenshots/11-start-creation-modal.png) |
-
-### 2. 三套主题对比（同一界面，不同主题）
-
-| 主题 | 配色 | 截图 |
-| ---- | ---- | ---- |
-| 墨问·默认 | 紫罗兰（毛笔书法） | ![Default](docs/screenshots/10-theme-mowen-default.png) |
-| 宁静·远景 | 青碧玉 | ![Cyan](docs/screenshots/09-theme-cyan-jade.png) |
-| 秋枫·霞谷 | 朱砂红 | ![Vermilion](docs/screenshots/21-theme-vermilion.png) |
-
-### 3. 大屏指挥中心 · 8 个可视化 Tab
+进入项目后，右侧是 8 个数据可视化 Tab，单屏看全 AI 创作全过程。
 
 | Tab | 用途 | 截图 |
 | --- | ---- | ---- |
@@ -83,13 +65,27 @@
 | **全局统计** | 实时 KPI、字数趋势、章节完成率 | ![](docs/screenshots/18-tab-全局统计.png) |
 | **故事总览** | 仪表盘 + 创作指导建议 | ![](docs/screenshots/19-tab-故事总览.png) |
 
-### 4. 后端 API 文档
+> 上面 8 张截图的 Tab 顺序就是顶栏的 8 个 Tab，从左到右依次点击抓取。每个 Tab 都从数据库拉真实数据，所以你会看到 30 章、20 万字、世界素材 16 个等具体数字。
 
-![API Docs](docs/screenshots/03-api-docs.png)
+### 2. 三套主题对比（同一项目 / 同一 Tab，不同主题）
 
-### 5. Neo4j Browser（关系图谱）
+主题切换不只是换一张背景图 —— 整个 UI 的按钮、边框、卡片、悬浮态都会跟着主题主色重新着色（CSS 变量驱动，约 50 个变量一次性更新）。
 
-![Neo4j](docs/screenshots/04-neo4j.png)
+| 主题 | 配色 | 截图 |
+| ---- | ---- | ---- |
+| **墨问·默认** | 紫罗兰（毛笔书法） | ![Default](docs/screenshots/10-theme-mowen-default.png) |
+| **宁静·远景** | 青碧玉 #4f9a8c | ![Cyan](docs/screenshots/09-theme-cyan-jade.png) |
+| **秋枫·霞谷** | 朱砂红 #c0392b | ![Vermilion](docs/screenshots/21-theme-vermilion.png) |
+
+主题切换面板（6 张主题卡 + 自定义上传入口）：
+
+![Theme Switcher](docs/screenshots/08-theme-switcher.png)
+
+### 3. 项目主页（全屏 30 章运行中状态）
+
+进入「趁青春，奋斗去！」项目后的主界面：左侧项目栏 / 中间 AI 对话与操作日志 / 右侧 8 Tab 看板。
+
+![Home](docs/screenshots/04-home-project.png)
 
 > 6 张内置主题的高清原图（含水墨山水、登录页专属）位于 `frontend/public/themes/`，可直接拖到浏览器看完整效果。
 
@@ -202,13 +198,22 @@ bash scripts/rollback.sh
 
 ```bash
 pip install playwright
-python -m playwright install chromium
-python scripts/capture_e2e.py    # 20+ 张核心流程截图
-python scripts/capture_extra.py # 主题对比 + AI 聊天补充
+# 默认调用系统 Edge (C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe)，
+# 避免下载 200MB+ 的 chromium；Linux/macOS 上把 capture_admin.py 里的 EDGE 常量改自己路径。
+
+# 1. admin 登录 → 选项目「趁青春，奋斗去！」→ 拍 8 Tab + 3 套主题
+python scripts/capture_admin.py
+# 2. 补拍 10 (墨问·默认) + 21 (秋枫·霞谷) 两张主题（用 JS 兜底点击）
+python scripts/capture_themes_redo.py
 ```
 
-> 脚本默认调用系统 Edge（`C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`），
-> 避免下载 200MB+ 的 chromium。需要在 Linux/macOS 上跑时把 `EDGE` 常量改成自己的路径。
+> **截图脚本工作流**：
+> 1. 登录 admin（密码 `admin123456`）→ 自动从项目下拉选 id=1
+> 2. 依次点击 8 个 Tab，每次等待 3.5s 让图表渲染完整
+> 3. 打开主题面板切 3 套主题（青/红/紫）各拍一张
+> 4. 输出到 `docs/screenshots/`，分辨率 1920×1080
+>
+> 如果你想换演示项目，编辑 `capture_admin.py` 顶部的 `BASE` / `ADMIN_USER` / `ADMIN_PASS` 和脚本里的 `select_option(value="1")` 即可。
 
 ---
 
@@ -360,9 +365,9 @@ novel-ai-editer/
 │   ├── rebuild.ps1 / .sh     # 重建镜像
 │   ├── rollback.ps1 / .sh    # 回滚版本
 │   ├── screenshot.ps1        # 截 README 展示图（Edge headless）
-│   ├── capture_e2e.py        # E2E 流程截图（注册→建项目→主题→Tab）
-│   ├── capture_extra.py      # 主题对比 + 启动创作弹窗
-│   └── capture_10_20.py      # 补拍脚本
+│   ├── capture_admin.py      # admin 登录 + 8 Tab + 主题切换截图（README 主用）
+│   ├── capture_themes_redo.py# 补拍 10/21 主题（JS 兜底点击）
+│   └── gen_admin_hash.py     # 重置 admin 密码的哈希生成器
 │
 ├── docker-compose.yml        # 4 服务编排
 ├── .env.example              # 环境变量模板
