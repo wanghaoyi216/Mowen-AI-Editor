@@ -245,10 +245,10 @@ Frontend (React 19 + Vite 6 + TypeScript 5.8)
                          · absolute_deadline (60s)
                          · FirstByteTimeout → no_retry
                                        │
-              ┌────────────────────────┼────────────────────────┐
-              ▼                        ▼                        ▼
-        MySQL 8.4                Neo4j 5.24                  Redis 7
-    项目/章节/任务/checkpoint     故事图谱关系                限流/缓存
+                    ┌──────────────────┴──────────────────┐
+                    ▼                                     ▼
+              MySQL 8.4                              Neo4j 5.24
+          项目/章节/任务/checkpoint                故事图谱关系
 ```
 
 ---
@@ -287,13 +287,6 @@ docker compose up -d
 | 后端 API | http://localhost:8000 | FastAPI |
 | API 文档 | http://localhost:8000/docs | Swagger UI |
 | Neo4j Browser | http://localhost:7474 | 图数据库可视化 |
-
-### 默认账号
-
-```
-账号: text
-密码: 123456
-```
 
 ---
 
