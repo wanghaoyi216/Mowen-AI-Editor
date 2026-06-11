@@ -52,10 +52,16 @@ build_web*.log
 docker_build.log
 
 # ===== 资源 / 截图（README 用，必须入仓）=====
-# README.md 引用了 resource/Screenshot/ 下的截图
-resource/Screenshot/
-docs/screenshots/
-docs/superpowers/
+# README.md 引用了 resource/Screenshot/ 下的截图，必须追踪
+!resource/Screenshot/
+!resource/Screenshot/**/*.png
+!resource/Screenshot/**/*.jpg
+!resource/Screenshot/**/*.jpeg
+!resource/Screenshot/**/*.gif
+!docs/screenshots/
+!docs/screenshots/**/*.png
+!docs/superpowers/
+!docs/superpowers/**/*.png
 
 # ===== 临时目录 / 草稿 =====
 .tmp/

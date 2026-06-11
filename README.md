@@ -1,4 +1,4 @@
-# Mowen AI Editor · 墨文 AI 编辑器
+# Mowen AI Editor · 墨问 AI 编辑器
 
 **LangGraph 多智能体编排 · Plan-and-Execute · ReAct 反思循环 · Neo4j 故事图谱**
 
@@ -18,88 +18,6 @@
 | 🧠 长上下文 | 🔄 断点续跑 | 📡 实时事件流 | 🎨 6 套主题 | 🕸️ 知识图谱 |
 |:---:|:---:|:---:|:---:|:---:|
 | 1M token | checkpoint 持久化 | AgentEventBus SSE | 水墨风自定义 | Neo4j 关系网 |
-
----
-
-## 🎯 核心亮点
-
-### 1. LangGraph StateGraph + 并行 SubAgent
-
-章节生成采用 **LangGraph StateGraph** 编排多个 SubAgent 并行执行：
-
-![LangGraph 架构](https://mermaid.ink/img/mermaid.ink?encodeUrl?基类=0&format=png&height=400&src=flowchart LR subgraph Plan A["📋 Plan Chapter"] end subgraph SubAgents B["👤 Character Design"] C["📖 Plot Design"] D["🌍 Worldbook Check"] end subgraph Generation E["✍️ Draft"] F["🔍 Consistency Review"] G["🔄 Revise (ReAct Loop)"] H["💾 Store Chapter"] end A --> B A --> C A --> D B --> E C --> E D --> E E --> F F --failed--> G G --> E F --passed--> H)
-
-- **并行 SubAgent**：角色设计、剧情设计、世界观一致性同时跑
-- **ReAct 反思循环**：Draft → Review → Revise → Draft 循环直到通过
-- **LangGraph StateGraph**：[chapter_loop_service.py](backend/app/services/chapter_loop_service.py)
-
-### 2. Plan-and-Execute 工作流注册表
-
-注册式设计，新增工作流只需改一处配置，无需改前端/路由：
-
-| ID | 名称 | 说明 |
-|---|---|---|
-| `wf-01` | 热点搜索 | Plan → Search → Store |
-| `wf-02` | 世界观设计 | Plan → Design → Store |
-| `wf-03` | 章节规划 | Plan → Strategize → Store |
-| `wf-04` | 写作策略 | Plan → Decide → Store |
-| `wf-05` | 章节生成 | Plan → Draft → Revise → Store |
-
-注册表：[workflow_registry_service.py](backend/app/services/workflow_registry_service.py)
-
-### 3. 任务 Checkpoint + 断点续跑
-
-[task_persistence_service.py](backend/app/services/task_persistence_service.py)
-
-- 每次 LLM 调用前写 checkpoint 到 MySQL
-- 进程崩溃 / 容器重启 / LLM 限流 → 自动标记 `paused`
-- `POST /projects/tasks/cleanup-orphans` 运维兜底清理
-- `POST /projects/{id}/tasks/{tid}/resume` 断点续跑
-
-### 4. 多模型自动降级
-
-[openrouter_client.py](backend/app/integrations/openrouter_client.py)
-
-- Primary + 多个 Fallback 模型按序尝试
-- **首字节超时**（主 10s / fallback 20s）+ **整体超时**双保险
-- `FirstByteTimeout` 不重试，直接切下一个模型
-- 模型 hang 死时 **20s 内** 自动切换
-
-### 5. AgentEventBus 实时事件流
-
-[agent_event_bus.py](backend/app/services/agent_event_bus.py)
-
-- `tool_call` / `tool_result` — 联网搜索 / Neo4j 查询
-- `thinking` — Reasoning 模型思考过程
-- `text_delta` — 流式 token 实时推送
-
-### 6. Neo4j 故事图谱
-
-角色、事件、地点、势力的多对多关系网络；章节生成时自动查询前文节点作为上下文（解决 LLM 失忆问题）；前端用 [react-force-graph](https://github.com/vasturiano/react-force-graph) 渲染。
-
----
-
-## 🏗️ 技术架构
-
-```
-Frontend (React 19) ──SSE/REST──> Backend (FastAPI + LangGraph)
-                                     │
-                    ┌────────────────┼────────────────┐
-                    ▼                ▼                ▼
-              Novel Orchestrator  Chapter Loop    Workflow Registry
-              (3-Phase)         (SubAgent DAG)   (5 Pre-defined WFs)
-                    │                │                │
-                    └────────────────┼────────────────┘
-                                     ▼
-                        OpenRouter Client (Primary + Fallback)
-                                     │
-                    ┌────────────────┴────────────────┐
-                    ▼                ▼                ▼
-                 MySQL 8.4        Neo4j 5.24        Redis 7
-               业务+checkpoint    故事图谱          限流+缓存
-```
-
-详细分层见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
 
 ---
 
@@ -146,6 +64,124 @@ docker compose up -d
 
 ---
 
+## 📸 功能展示
+
+### 1. 主题系统
+
+支持 6 套水墨主题，可自定义上传背景图并自动提取主色：
+
+![主题选择](resource/Screenshot/主题风格选择.png)
+
+### 2. 故事总览
+
+项目管理界面，展示章节进度和项目元信息：
+
+![故事总览](resource/Screenshot/故事总览.png)
+
+### 3. AI 自动写作
+
+实时显示 AI 执行阶段和步骤状态：
+
+![AI自动执行](resource/Screenshot/AI自动执行阶段.png)
+
+### 4. 故事图谱
+
+使用 Neo4j 构建角色、事件、地点的关系网络：
+
+![故事图谱](resource/Screenshot/故事图谱.png)
+
+---
+
+## 🎯 核心技术亮点
+
+### 1. LangGraph StateGraph + 并行 SubAgent
+
+章节生成采用 **LangGraph StateGraph** 编排多个 SubAgent 并行执行：
+
+```
+Plan Chapter
+    │
+    ├──→ Character Design ──┐
+    ├──→ Plot Design ──────┼──→ Draft ──→ Consistency Review
+    └──→ Worldbook Check ──┘              │
+                                           ├──→ failed → Revise → Draft (循环)
+                                           └──→ passed → Store Chapter
+```
+
+- **并行 SubAgent**：角色设计、剧情设计、世界观一致性同时跑
+- **ReAct 反思循环**：Draft → Review → Revise 循环直到通过
+- **代码位置**：[chapter_loop_service.py](backend/app/services/chapter_loop_service.py)
+
+### 2. Plan-and-Execute 工作流注册表
+
+注册式设计，新增工作流只需改一处配置：
+
+| ID | 名称 | 说明 |
+|---|---|---|
+| `wf-01` | 热点搜索 | Plan → Search → Store |
+| `wf-02` | 世界观设计 | Plan → Design → Store |
+| `wf-03` | 章节规划 | Plan → Strategize → Store |
+| `wf-04` | 写作策略 | Plan → Decide → Store |
+| `wf-05` | 章节生成 | Plan → Draft → Revise → Store |
+
+**代码位置**：[workflow_registry_service.py](backend/app/services/workflow_registry_service.py)
+
+### 3. 任务 Checkpoint + 断点续跑
+
+每次 LLM 调用前写 checkpoint 到 MySQL，进程崩溃自动标记为 `paused`：
+
+- `POST /projects/tasks/cleanup-orphans` — 运维兜底清理
+- `POST /projects/{id}/tasks/{tid}/resume` — 断点续跑
+
+**代码位置**：[task_persistence_service.py](backend/app/services/task_persistence_service.py)
+
+### 4. 多模型自动降级
+
+双超时 + 快速切换机制，模型 hung 死时 20s 内自动切 fallback：
+
+| 超时类型 | 主模型 | Fallback |
+|---|---|---|
+| 首字节 | 10s | 20s |
+| 整体 | 60s | 60s |
+
+**代码位置**：[openrouter_client.py](backend/app/integrations/openrouter_client.py)
+
+### 5. AgentEventBus 实时事件流
+
+进程内总线，前端 SSE 订阅实时事件：
+
+- `tool_call` / `tool_result` — 联网搜索、Neo4j 查询
+- `thinking` — Reasoning 模型思考过程
+- `text_delta` — 流式 token
+
+**代码位置**：[agent_event_bus.py](backend/app/services/agent_event_bus.py)
+
+---
+
+## 🏗️ 技术架构
+
+```
+Frontend (React 19 + Vite 6)
+       │
+       └── REST/SSE ──→ Backend (FastAPI + LangGraph 0.4.8)
+                              │
+              ┌────────────────┼────────────────┐
+              ▼                ▼                ▼
+       Novel Orchestrator  Chapter Loop    Workflow Registry
+              │                │                │
+              └────────────────┼────────────────┘
+                               ▼
+                    OpenRouter Client
+                    (Primary + Fallback)
+                               │
+              ┌────────────────┼────────────────┐
+              ▼                ▼                ▼
+           MySQL 8.4        Neo4j 5.24        Redis 7
+         业务+checkpoint    故事图谱          限流+缓存
+```
+
+---
+
 ## 🧩 项目结构
 
 ```
@@ -161,7 +197,6 @@ backend/
 │   │   ├── workflow_registry_service.py   # 5 套工作流注册
 │   │   ├── novel_orchestrator_service.py # 3-Phase 主编排
 │   │   ├── chapter_loop_service.py        # SubAgent DAG + ReAct
-│   │   ├── ai_workflow_graph_service.py   # Plan-and-Execute
 │   │   ├── task_persistence_service.py    # checkpoint + orphan
 │   │   ├── agent_event_bus.py             # SSE 事件流
 │   │   └── openrouter_service.py          # 模型候选 + fallback
@@ -171,24 +206,16 @@ backend/
 │       ├── config.py         # Pydantic Settings
 │       └── resilience.py     # with_retries + no_retry
 frontend/
-├── src/
-│   ├── components/           # 主题切换 / 项目卡片
-│   ├── pages/               # Login / Project / Chapter / Graph
-│   ├── stores/              # Zustand: theme / auth / task
-│   └── api/                 # axios + SSE 订阅
-docs/
-├── ARCHITECTURE.md
-├── DEPLOYMENT.md
-├── OPERATIONS.md
-└── API_CHEATSHEET.md
+└── src/
+    ├── components/           # 主题切换 / 项目卡片
+    ├── pages/               # Login / Project / Chapter / Graph
+    ├── stores/              # Zustand: theme / auth / task
+    └── api/                 # axios + SSE 订阅
 ```
 
 ---
 
 ## 🔌 API 速览
-
-<details>
-<summary>点击展开 14 个核心端点</summary>
 
 | Method | Path | 用途 |
 |---|---|---|
@@ -200,26 +227,21 @@ docs/
 | `POST` | `/api/v1/projects/{id}/workflows/{wid}/execute` | 执行工作流 |
 | `GET` | `/api/v1/projects/{id}/tasks` | 列任务 |
 | `GET` | `/api/v1/projects/{id}/tasks/{tid}` | 任务详情 |
-| `GET` | `/api/v1/projects/{id}/tasks/{tid}/steps` | 步骤状态 |
 | `POST` | `/api/v1/projects/{id}/tasks/{tid}/resume` | 断点续跑 |
 | `POST` | `/api/v1/projects/tasks/cleanup-orphans` | 清理孤儿任务 |
 
-完整 OpenAPI：[docs/openapi.json](docs/openapi.json) · `/docs`
-
-</details>
+完整 OpenAPI 文档：`http://localhost:8000/docs`
 
 ---
 
-## 🛠️ 排障
+## 🛠️ 排障指南
 
 | 症状 | 解决方案 |
 |---|---|
-| 任务卡 `running` | `POST /cleanup-orphans` → 再 `resume` |
+| 任务卡 `running` | 调用 `/cleanup-orphans` → 再 `resume` |
 | AI 60s 无响应 | 日志搜 `absolute deadline exceeded`，已自动切 fallback |
 | LLM 401/403 | 检查 `.env` 的 `NVIDIA_API_KEY` 是否过期 |
 | Neo4j 连不上 | `docker logs novel_ai_neo4j`，首次启动需 30s+ |
-
-更多：[docs/OPERATIONS.md](docs/OPERATIONS.md)
 
 ---
 
@@ -241,7 +263,6 @@ git clone https://github.com/wanghaoyi216/Mowen-AI-Editor.git
 git checkout -b feat/your-feature
 git commit -m "feat: add your feature"
 git push origin feat/your-feature
-# 然后开 Pull Request
 ```
 
 ---
@@ -251,5 +272,7 @@ git push origin feat/your-feature
 MIT License · 仅供学习研究使用
 
 ---
+
+**如果这个项目对你有帮助，欢迎 ⭐ Star 支持开发！**
 
 _Built with LangGraph · NVIDIA integrate API · Neo4j_
